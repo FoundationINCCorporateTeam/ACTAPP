@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Analytics - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .heat-map-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin: 1px;
+        }
+        .heat-level-0 { background-color: #ebedf0; }
+        .heat-level-1 { background-color: #9be9a8; }
+        .heat-level-2 { background-color: #40c463; }
+        .heat-level-3 { background-color: #30a14e; }
+        .heat-level-4 { background-color: #216e39; }
+        .achievement-badge {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .achievement-badge:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .achievement-badge.locked {
+            filter: grayscale(100%);
+            opacity: 0.5;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- XP and Level -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="text-sm font-medium">Level <span class="user-level">1</span></span>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-sm"><span class="user-xp">0</span> XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="hidden sm:flex items-center space-x-1 bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-fire"></i>
+                    <span class="text-sm font-medium"><span class="user-streak">0</span> day streak</span>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white user-avatar">
+                            <span class="text-sm font-medium">?</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border hidden" id="user-dropdown">
+                        <div class="px-4 py-3 border-b">
+                            <div class="font-medium user-name">User</div>
+                            <div class="text-sm text-gray-500 user-email">user@example.com</div>
+                        </div>
+                        <div class="py-1">
+                            <a href="/profile" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i> Profile
+                            </a>
+                            <a href="/settings" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-danger hover:bg-gray-50">
+                                <i class="fas fa-sign-out-alt w-5"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/lessons" class="sidebar-link">
+                <i class="fas fa-book"></i> Lessons
+            </a>
+            <a href="/quizzes" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Quizzes
+            </a>
+            <a href="/tests" class="sidebar-link">
+                <i class="fas fa-file-alt"></i> Practice Tests
+            </a>
+            <a href="/chat" class="sidebar-link">
+                <i class="fas fa-comments"></i> AI Tutor
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            
+            <a href="/study-plan" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i> Study Plan
+            </a>
+            <a href="/essays" class="sidebar-link">
+                <i class="fas fa-pen-fancy"></i> Essay Practice
+            </a>
+            <a href="/flashcards" class="sidebar-link">
+                <i class="fas fa-clone"></i> Flashcards
+            </a>
+            <a href="/progress" class="sidebar-link active">
+                <i class="fas fa-chart-line"></i> Progress
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Account</div>
+            
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="/help" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Progress Analytics 📊</h1>
+            <p class="text-gray-600 mt-1">Track your ACT preparation journey and identify areas for improvement</p>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Estimated ACT Score</p>
+                        <div class="flex items-center">
+                            <p class="text-3xl font-bold text-primary" id="estimated-score">--</p>
+                            <span id="score-trend" class="ml-2 text-success hidden">
+                                <i class="fas fa-arrow-up"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-trophy text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Study Streak</p>
+                        <div class="flex items-center">
+                            <p class="text-3xl font-bold" id="streak-count">0</p>
+                            <span class="ml-2 text-2xl">🔥</span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-fire text-orange-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Study Time</p>
+                        <p class="text-3xl font-bold" id="total-study-time">0:00</p>
+                    </div>
+                    <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-success text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Lessons / Quizzes</p>
+                        <p class="text-3xl font-bold"><span id="lessons-count">0</span> / <span id="quizzes-count">0</span></p>
+                    </div>
+                    <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-open text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-8">
+            <!-- Score History Chart -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-semibold">Score History</h3>
+                    <select id="score-period" class="form-select text-sm w-auto no-print">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <canvas id="score-history-chart" height="250"></canvas>
+                </div>
+            </div>
+
+            <!-- Subject Performance Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold">Subject Performance</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="subject-performance-chart" height="250"></canvas>
+                </div>
+            </div>
+
+            <!-- Time Spent by Subject -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold">Time Spent by Subject</h3>
+                </div>
+                <div class="card-body flex items-center justify-center">
+                    <div class="w-64 h-64">
+                        <canvas id="time-by-subject-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Consistency Calendar -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold">Study Consistency</h3>
+                </div>
+                <div class="card-body">
+                    <div id="heat-map-container" class="overflow-x-auto">
+                        <div id="heat-map" class="flex flex-wrap gap-0.5"></div>
+                    </div>
+                    <div class="flex items-center justify-end mt-4 text-xs text-gray-500">
+                        <span class="mr-2">Less</span>
+                        <div class="heat-map-cell heat-level-0"></div>
+                        <div class="heat-map-cell heat-level-1"></div>
+                        <div class="heat-map-cell heat-level-2"></div>
+                        <div class="heat-map-cell heat-level-3"></div>
+                        <div class="heat-map-cell heat-level-4"></div>
+                        <span class="ml-2">More</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics Section -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-8">
+            <!-- Strengths -->
+            <div class="card">
+                <div class="card-header flex items-center">
+                    <i class="fas fa-star text-success mr-2"></i>
+                    <h3 class="font-semibold">Your Strengths</h3>
+                </div>
+                <div class="card-body p-0" id="strengths-list">
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-trophy text-4xl mb-2 text-gray-300"></i>
+                        <p>Complete more quizzes to identify strengths</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weaknesses -->
+            <div class="card">
+                <div class="card-header flex items-center">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                    <h3 class="font-semibold">Areas to Improve</h3>
+                </div>
+                <div class="card-body p-0" id="weaknesses-list">
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-chart-line text-4xl mb-2 text-gray-300"></i>
+                        <p>Complete more quizzes to identify areas for improvement</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="card mb-8">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold">Recent Activity</h3>
+                <select id="activity-filter" class="form-select text-sm w-auto no-print">
+                    <option value="all">All Activities</option>
+                    <option value="lesson_generated">Lessons</option>
+                    <option value="quiz_completed">Quizzes</option>
+                    <option value="test_completed">Practice Tests</option>
+                    <option value="essay_graded">Essays</option>
+                </select>
+            </div>
+            <div class="card-body p-0" id="activity-feed">
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-history text-4xl mb-2 text-gray-300"></i>
+                    <p>No activity yet</p>
+                    <p class="text-sm">Start studying to see your progress</p>
+                </div>
+            </div>
+            <div class="card-footer text-center hidden" id="load-more-container">
+                <button id="load-more-btn" class="btn btn-secondary text-sm">Load More</button>
+            </div>
+        </div>
+
+        <!-- Score Report Section -->
+        <div class="card mb-8" id="score-report">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold">Score Report</h3>
+                <button id="generate-report-btn" class="btn btn-primary text-sm no-print">
+                    <i class="fas fa-file-pdf mr-1"></i> Generate Report
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <!-- Section Scores -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Section Scores</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">English</span>
+                                <span class="font-bold text-primary" id="english-section-score">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Math</span>
+                                <span class="font-bold text-success" id="math-section-score">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Reading</span>
+                                <span class="font-bold text-warning" id="reading-section-score">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Science</span>
+                                <span class="font-bold text-secondary" id="science-section-score">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Writing</span>
+                                <span class="font-bold text-gray-600" id="writing-section-score">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projected Score -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Projected Score</h4>
+                        <div class="text-center py-4">
+                            <p class="text-5xl font-bold text-primary" id="projected-score">--</p>
+                            <p class="text-sm text-gray-500 mt-1">Confidence: <span id="confidence-interval">±0</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Target Comparison -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Target Comparison</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Your Target</span>
+                                <span class="font-bold" id="target-score">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Current Projected</span>
+                                <span class="font-bold text-primary" id="current-projected">--</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Gap</span>
+                                <span class="font-bold" id="score-gap">--</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="progress h-3">
+                                <div class="progress-bar" id="target-progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Percentile -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Percentile Ranking</h4>
+                        <div class="text-center py-4">
+                            <p class="text-5xl font-bold text-success" id="percentile-rank">--</p>
+                            <p class="text-sm text-gray-500 mt-1">percentile</p>
+                        </div>
+                        <p class="text-xs text-gray-500 text-center">Based on national averages</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div class="card mb-8">
+            <div class="card-header">
+                <h3 class="font-semibold">Achievements</h3>
+            </div>
+            <div class="card-body">
+                <div id="achievements-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    <!-- Achievements will be loaded dynamically -->
+                    <div class="text-center col-span-full text-gray-500 py-8">
+                        <i class="fas fa-medal text-4xl mb-2 text-gray-300"></i>
+                        <p>Loading achievements...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="card mb-8 no-print">
+            <div class="card-header">
+                <h3 class="font-semibold">Export Data</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <button id="export-json-btn" class="btn btn-secondary flex items-center justify-center">
+                        <i class="fas fa-download mr-2"></i> Download All Data (JSON)
+                    </button>
+                    <button id="export-weekly-btn" class="btn btn-secondary flex items-center justify-center">
+                        <i class="fas fa-calendar-week mr-2"></i> Weekly Summary
+                    </button>
+                    <button id="export-monthly-btn" class="btn btn-secondary flex items-center justify-center">
+                        <i class="fas fa-calendar-alt mr-2"></i> Monthly Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Loading, Format, Modal } = window.ACT;
+
+        // Chart instances
+        let scoreHistoryChart = null;
+        let subjectPerformanceChart = null;
+        let timeBySubjectChart = null;
+
+        // Data storage
+        let analyticsData = null;
+        let achievementsData = null;
+        let activityData = [];
+        let activityPage = 1;
+
+        // Initialize page
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/progress';
+                return;
+            }
+
+            window.ACT.updateUserUI(user);
+            document.querySelectorAll('.user-email').forEach(el => {
+                el.textContent = user.email;
+            });
+
+            // Load all data in parallel
+            await Promise.all([
+                loadAnalytics(),
+                loadAchievements(),
+                loadActivity()
+            ]);
+
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await API.get('/api/progress/analytics');
+                analyticsData = response.data;
+                updateStatsCards(analyticsData);
+                initScoreHistoryChart(analyticsData.scoreHistory);
+                initSubjectPerformanceChart(analyticsData.subjects);
+                initTimeBySubjectChart(analyticsData.timeBySubject);
+                initHeatMap(analyticsData.studyDays);
+                updateStrengthsWeaknesses(analyticsData);
+                updateScoreReport(analyticsData);
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+                Toast.error('Failed to load analytics data');
+            }
+        }
+
+        async function loadAchievements() {
+            try {
+                const response = await API.get('/api/progress/achievements');
+                achievementsData = response.data;
+                renderAchievements(achievementsData);
+            } catch (error) {
+                console.error('Failed to load achievements:', error);
+            }
+        }
+
+        async function loadActivity(append = false) {
+            try {
+                const filter = document.getElementById('activity-filter').value;
+                const params = new URLSearchParams({ page: activityPage, limit: 20 });
+                if (filter !== 'all') params.append('type', filter);
+                
+                const response = await API.get(`/api/progress/activity?${params}`);
+                const { activities, hasMore } = response.data;
+                
+                if (append) {
+                    activityData = [...activityData, ...activities];
+                } else {
+                    activityData = activities;
+                }
+                
+                renderActivityFeed(activityData);
+                document.getElementById('load-more-container').classList.toggle('hidden', !hasMore);
+            } catch (error) {
+                console.error('Failed to load activity:', error);
+            }
+        }
+
+        function updateStatsCards(data) {
+            const stats = data.stats || {};
+            
+            document.getElementById('estimated-score').textContent = data.estimatedScore || '--';
+            document.getElementById('streak-count').textContent = stats.streak || 0;
+            
+            const totalMinutes = stats.totalStudyTime || 0;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            document.getElementById('total-study-time').textContent = `${hours}:${String(minutes).padStart(2, '0')}`;
+            
+            document.getElementById('lessons-count').textContent = stats.lessonsCompleted || 0;
+            document.getElementById('quizzes-count').textContent = stats.quizzesTaken || 0;
+
+            // Show trend arrow if score is improving
+            if (data.scoreTrend && data.scoreTrend > 0) {
+                const trendEl = document.getElementById('score-trend');
+                trendEl.classList.remove('hidden');
+                trendEl.innerHTML = `<i class="fas fa-arrow-up"></i> +${data.scoreTrend}`;
+            }
+        }
+
+        function initScoreHistoryChart(scoreHistory) {
+            const ctx = document.getElementById('score-history-chart').getContext('2d');
+            
+            const labels = [];
+            const data = [];
+            const trendLine = [];
+            
+            if (scoreHistory && scoreHistory.length > 0) {
+                scoreHistory.forEach((item, index) => {
+                    labels.push(Format.date(item.date, { month: 'short', day: 'numeric' }));
+                    data.push(item.score);
+                    // Simple trend calculation
+                    const trend = index === 0 ? item.score : (data[index - 1] + item.score) / 2;
+                    trendLine.push(trend);
+                });
+            } else {
+                // Demo data
+                const now = new Date();
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    labels.push(Format.date(date, { month: 'short', day: 'numeric' }));
+                    data.push(0);
+                    trendLine.push(0);
+                }
+            }
+
+            if (scoreHistoryChart) scoreHistoryChart.destroy();
+            
+            scoreHistoryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Score',
+                            data,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#2563eb',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Trend',
+                            data: trendLine,
+                            borderColor: '#10b981',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initSubjectPerformanceChart(subjects) {
+            const ctx = document.getElementById('subject-performance-chart').getContext('2d');
+            
+            const subjectNames = ['English', 'Math', 'Reading', 'Science', 'Writing'];
+            const subjectKeys = ['english', 'math', 'reading', 'science', 'writing'];
+            const colors = ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#6b7280'];
+            
+            const data = subjectKeys.map(key => subjects?.[key]?.score || 0);
+
+            if (subjectPerformanceChart) subjectPerformanceChart.destroy();
+            
+            subjectPerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: subjectNames,
+                    datasets: [{
+                        label: 'Performance %',
+                        data,
+                        backgroundColor: colors,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initTimeBySubjectChart(timeBySubject) {
+            const ctx = document.getElementById('time-by-subject-chart').getContext('2d');
+            
+            const subjectNames = ['English', 'Math', 'Reading', 'Science', 'Writing'];
+            const subjectKeys = ['english', 'math', 'reading', 'science', 'writing'];
+            const colors = ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#6b7280'];
+            
+            const data = subjectKeys.map(key => timeBySubject?.[key] || 0);
+
+            if (timeBySubjectChart) timeBySubjectChart.destroy();
+            
+            timeBySubjectChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: subjectNames,
+                    datasets: [{
+                        data,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const minutes = context.raw;
+                                    const hours = Math.floor(minutes / 60);
+                                    const mins = minutes % 60;
+                                    return `${context.label}: ${hours}h ${mins}m`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initHeatMap(studyDays) {
+            const container = document.getElementById('heat-map');
+            container.innerHTML = '';
+            
+            const today = new Date();
+            const startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - 90); // Last 90 days
+            
+            const studyDayMap = {};
+            if (studyDays) {
+                studyDays.forEach(day => {
+                    studyDayMap[day.date] = day.minutes;
+                });
+            }
+            
+            for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const minutes = studyDayMap[dateStr] || 0;
+                
+                let level = 0;
+                if (minutes > 0 && minutes < 15) level = 1;
+                else if (minutes >= 15 && minutes < 30) level = 2;
+                else if (minutes >= 30 && minutes < 60) level = 3;
+                else if (minutes >= 60) level = 4;
+                
+                const cell = document.createElement('div');
+                cell.className = `heat-map-cell heat-level-${level}`;
+                cell.title = `${Format.date(new Date(dateStr), { weekday: 'short', month: 'short', day: 'numeric' })}: ${minutes} minutes`;
+                container.appendChild(cell);
+            }
+        }
+
+        function updateStrengthsWeaknesses(data) {
+            const strengths = data.strengths || [];
+            const weaknesses = data.weaknesses || [];
+            
+            const strengthsList = document.getElementById('strengths-list');
+            const weaknessesList = document.getElementById('weaknesses-list');
+            
+            if (strengths.length > 0) {
+                strengthsList.innerHTML = strengths.slice(0, 5).map(item => `
+                    <div class="flex items-center px-4 py-3 border-b last:border-b-0">
+                        <div class="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-check text-success"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${item.topic}</p>
+                            <p class="text-xs text-gray-500">${item.subject} • ${item.questionsAnswered} questions</p>
+                        </div>
+                        <span class="text-success font-bold">${item.accuracy}%</span>
+                    </div>
+                `).join('');
+            }
+            
+            if (weaknesses.length > 0) {
+                weaknessesList.innerHTML = weaknesses.slice(0, 5).map(item => `
+                    <div class="flex items-center px-4 py-3 border-b last:border-b-0">
+                        <div class="w-10 h-10 bg-danger/10 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-times text-danger"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${item.topic}</p>
+                            <p class="text-xs text-gray-500">${item.subject} • ${item.questionsAnswered} questions</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-danger font-bold">${item.accuracy}%</span>
+                            <button class="ml-2 btn btn-primary text-xs py-1 px-2" onclick="practiceTopic('${item.topic}', '${item.subject}')">
+                                Practice
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateScoreReport(data) {
+            const sections = data.sectionScores || {};
+            
+            document.getElementById('english-section-score').textContent = sections.english || '--';
+            document.getElementById('math-section-score').textContent = sections.math || '--';
+            document.getElementById('reading-section-score').textContent = sections.reading || '--';
+            document.getElementById('science-section-score').textContent = sections.science || '--';
+            document.getElementById('writing-section-score').textContent = sections.writing || '--';
+            
+            document.getElementById('projected-score').textContent = data.projectedScore || '--';
+            document.getElementById('confidence-interval').textContent = `±${data.confidenceInterval || 0}`;
+            
+            const targetScore = data.targetScore || '--';
+            const currentProjected = data.projectedScore || 0;
+            document.getElementById('target-score').textContent = targetScore;
+            document.getElementById('current-projected').textContent = currentProjected || '--';
+            
+            if (typeof targetScore === 'number' && currentProjected) {
+                const gap = targetScore - currentProjected;
+                const gapEl = document.getElementById('score-gap');
+                gapEl.textContent = gap > 0 ? `-${gap}` : gap === 0 ? '0' : `+${Math.abs(gap)}`;
+                gapEl.className = `font-bold ${gap > 0 ? 'text-danger' : gap < 0 ? 'text-success' : ''}`;
+                
+                const progress = Math.min((currentProjected / targetScore) * 100, 100);
+                document.getElementById('target-progress-bar').style.width = `${progress}%`;
+            }
+            
+            document.getElementById('percentile-rank').textContent = data.percentileRank ? `${data.percentileRank}th` : '--';
+        }
+
+        function renderAchievements(achievements) {
+            const container = document.getElementById('achievements-grid');
+            
+            const allAchievements = [
+                { id: 'first_lesson', name: 'First Lesson', icon: 'fa-book', description: 'Complete your first lesson' },
+                { id: 'quiz_master', name: 'Quiz Master', icon: 'fa-brain', description: 'Complete 10 quizzes' },
+                { id: 'perfect_score', name: 'Perfect Score', icon: 'fa-star', description: 'Get 100% on any quiz' },
+                { id: 'week_warrior', name: 'Week Warrior', icon: 'fa-calendar-week', description: '7-day study streak' },
+                { id: 'month_master', name: 'Month Master', icon: 'fa-calendar-alt', description: '30-day study streak' },
+                { id: 'speed_demon', name: 'Speed Demon', icon: 'fa-bolt', description: 'Complete a quiz in under 2 minutes' },
+                { id: 'early_bird', name: 'Early Bird', icon: 'fa-sun', description: 'Study before 7 AM' },
+                { id: 'night_owl', name: 'Night Owl', icon: 'fa-moon', description: 'Study after 10 PM' },
+                { id: 'all_rounder', name: 'All-Rounder', icon: 'fa-circle-check', description: 'Complete lessons in all subjects' },
+                { id: 'math_whiz', name: 'Math Whiz', icon: 'fa-calculator', description: '90%+ on 5 Math quizzes' },
+                { id: 'word_smith', name: 'Word Smith', icon: 'fa-pen', description: '90%+ on 5 English quizzes' },
+                { id: 'science_star', name: 'Science Star', icon: 'fa-flask', description: '90%+ on 5 Science quizzes' },
+                { id: 'reader', name: 'Bookworm', icon: 'fa-book-open', description: '90%+ on 5 Reading quizzes' },
+                { id: 'essay_ace', name: 'Essay Ace', icon: 'fa-pen-fancy', description: 'Get 10+ on an essay' },
+                { id: 'test_taker', name: 'Test Taker', icon: 'fa-file-alt', description: 'Complete a full practice test' },
+                { id: 'improvement', name: 'On the Rise', icon: 'fa-arrow-trend-up', description: 'Improve score by 5 points' }
+            ];
+            
+            const earnedIds = achievements?.earned?.map(a => a.id) || [];
+            
+            container.innerHTML = allAchievements.map(achievement => {
+                const earned = earnedIds.includes(achievement.id);
+                return `
+                    <div class="achievement-badge ${earned ? '' : 'locked'} text-center p-3 bg-white rounded-lg border" title="${achievement.description}">
+                        <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center ${earned ? 'bg-warning/20' : 'bg-gray-100'}">
+                            <i class="fas ${achievement.icon} text-xl ${earned ? 'text-warning' : 'text-gray-400'}"></i>
+                        </div>
+                        <p class="text-xs font-medium truncate">${achievement.name}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderActivityFeed(activities) {
+            const container = document.getElementById('activity-feed');
+            
+            if (!activities || activities.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-history text-4xl mb-2 text-gray-300"></i>
+                        <p>No activity yet</p>
+                        <p class="text-sm">Start studying to see your progress</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const activityIcons = {
+                lesson_generated: { icon: 'fa-book', color: 'text-primary', bg: 'bg-primary/10' },
+                quiz_completed: { icon: 'fa-check-circle', color: 'text-success', bg: 'bg-success/10' },
+                test_completed: { icon: 'fa-file-alt', color: 'text-secondary', bg: 'bg-secondary/10' },
+                essay_graded: { icon: 'fa-pen-fancy', color: 'text-warning', bg: 'bg-warning/10' },
+                study_session: { icon: 'fa-clock', color: 'text-gray-600', bg: 'bg-gray-100' },
+                flashcard_session: { icon: 'fa-clone', color: 'text-purple-600', bg: 'bg-purple-100' }
+            };
+            
+            container.innerHTML = activities.map(activity => {
+                const info = activityIcons[activity.type] || activityIcons.study_session;
+                let description = '';
+                
+                switch(activity.type) {
+                    case 'lesson_generated':
+                        description = `Generated lesson on ${activity.topic}`;
+                        break;
+                    case 'quiz_completed':
+                        description = `Completed ${activity.subject} quiz - ${activity.score}%`;
+                        break;
+                    case 'test_completed':
+                        description = `Completed practice test - Score: ${activity.compositeScore}`;
+                        break;
+                    case 'essay_graded':
+                        description = `Essay graded - Score: ${activity.score}/12`;
+                        break;
+                    case 'study_session':
+                        description = `Studied ${activity.subject || 'ACT'} for ${activity.minutes} minutes`;
+                        break;
+                    case 'flashcard_session':
+                        description = `Reviewed ${activity.cardsReviewed} flashcards`;
+                        break;
+                    default:
+                        description = activity.description || activity.type;
+                }
+                
+                return `
+                    <div class="flex items-center px-4 py-3 border-b last:border-b-0 hover:bg-gray-50">
+                        <div class="w-10 h-10 ${info.bg} rounded-full flex items-center justify-center mr-3">
+                            <i class="fas ${info.icon} ${info.color}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${description}</p>
+                            <p class="text-xs text-gray-500">${Format.relative(activity.timestamp)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function practiceTopic(topic, subject) {
+            window.location.href = `/lessons?topic=${encodeURIComponent(topic)}&subject=${encodeURIComponent(subject)}`;
+        }
+
+        function setupEventListeners() {
+            // User menu toggle
+            document.getElementById('user-menu-btn').addEventListener('click', () => {
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                const userMenu = document.getElementById('user-menu');
+                if (!userMenu.contains(e.target)) {
+                    document.getElementById('user-dropdown').classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                await Auth.logout();
+            });
+
+            // Score period change
+            document.getElementById('score-period').addEventListener('change', async (e) => {
+                const period = e.target.value;
+                try {
+                    const response = await API.get(`/api/progress/analytics?period=${period}`);
+                    initScoreHistoryChart(response.data.scoreHistory);
+                } catch (error) {
+                    Toast.error('Failed to update chart');
+                }
+            });
+
+            // Activity filter
+            document.getElementById('activity-filter').addEventListener('change', () => {
+                activityPage = 1;
+                loadActivity();
+            });
+
+            // Load more activity
+            document.getElementById('load-more-btn').addEventListener('click', () => {
+                activityPage++;
+                loadActivity(true);
+            });
+
+            // Generate report
+            document.getElementById('generate-report-btn').addEventListener('click', () => {
+                window.print();
+            });
+
+            // Export buttons
+            document.getElementById('export-json-btn').addEventListener('click', exportAllData);
+            document.getElementById('export-weekly-btn').addEventListener('click', exportWeeklySummary);
+            document.getElementById('export-monthly-btn').addEventListener('click', exportMonthlyReport);
+        }
+
+        async function exportAllData() {
+            try {
+                Loading.show('Preparing export...');
+                const response = await API.get('/api/progress/export');
+                const data = response.data;
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `act-progress-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                Loading.hide();
+                Toast.success('Data exported successfully');
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to export data');
+            }
+        }
+
+        async function exportWeeklySummary() {
+            try {
+                Loading.show('Generating weekly summary...');
+                const response = await API.get('/api/progress/export/weekly');
+                const data = response.data;
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `act-weekly-summary-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                Loading.hide();
+                Toast.success('Weekly summary generated');
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to generate weekly summary');
+            }
+        }
+
+        async function exportMonthlyReport() {
+            try {
+                Loading.show('Generating monthly report...');
+                const response = await API.get('/api/progress/export/monthly');
+                const data = response.data;
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `act-monthly-report-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                Loading.hide();
+                Toast.success('Monthly report generated');
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to generate monthly report');
+            }
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

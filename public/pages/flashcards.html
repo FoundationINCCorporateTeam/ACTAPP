@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- XP and Level -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="text-sm font-medium">Level <span class="user-level">1</span></span>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-sm"><span class="user-xp">0</span> XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="hidden sm:flex items-center space-x-1 bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-fire"></i>
+                    <span class="text-sm font-medium"><span class="user-streak">0</span> day streak</span>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white user-avatar">
+                            <span class="text-sm font-medium">?</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border hidden" id="user-dropdown">
+                        <div class="px-4 py-3 border-b">
+                            <div class="font-medium user-name">User</div>
+                            <div class="text-sm text-gray-500 user-email">user@example.com</div>
+                        </div>
+                        <div class="py-1">
+                            <a href="/profile" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i> Profile
+                            </a>
+                            <a href="/settings" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-danger hover:bg-gray-50">
+                                <i class="fas fa-sign-out-alt w-5"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/lessons" class="sidebar-link">
+                <i class="fas fa-book"></i> Lessons
+            </a>
+            <a href="/quizzes" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Quizzes
+            </a>
+            <a href="/tests" class="sidebar-link">
+                <i class="fas fa-file-alt"></i> Practice Tests
+            </a>
+            <a href="/chat" class="sidebar-link">
+                <i class="fas fa-comments"></i> AI Tutor
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            
+            <a href="/study-plan" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i> Study Plan
+            </a>
+            <a href="/essays" class="sidebar-link">
+                <i class="fas fa-pen-fancy"></i> Essay Practice
+            </a>
+            <a href="/flashcards" class="sidebar-link active">
+                <i class="fas fa-clone"></i> Flashcards
+            </a>
+            <a href="/progress" class="sidebar-link">
+                <i class="fas fa-chart-line"></i> Progress
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Account</div>
+            
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="/help" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold">Flashcards</h1>
+            <p class="text-gray-600 mt-1">Create and study flashcard decks for effective memorization</p>
+        </div>
+
+        <!-- View: Deck Library -->
+        <div id="deck-library-view">
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button id="create-deck-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Deck
+                </button>
+                
+                <div class="relative">
+                    <button id="generate-lesson-btn" class="btn btn-secondary">
+                        <i class="fas fa-book"></i> Generate from Lesson
+                        <i class="fas fa-chevron-down ml-1"></i>
+                    </button>
+                    <div id="lesson-dropdown" class="absolute left-0 top-full mt-2 w-72 bg-white rounded-lg shadow-lg border hidden z-20">
+                        <div class="p-3 border-b">
+                            <div class="text-sm font-medium text-gray-500">Select a completed lesson</div>
+                        </div>
+                        <div id="lesson-list" class="max-h-64 overflow-y-auto">
+                            <div class="p-4 text-center text-gray-500">
+                                <i class="fas fa-spinner fa-spin"></i> Loading lessons...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="generate-topic-btn" class="btn btn-outline">
+                    <i class="fas fa-magic"></i> Generate from Topic
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <div class="flex-1 min-w-[200px]">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="search-input" class="form-input pl-10" placeholder="Search decks...">
+                            </div>
+                        </div>
+                        
+                        <select id="filter-subject" class="form-select w-auto">
+                            <option value="">All Subjects</option>
+                            <option value="English">English</option>
+                            <option value="Math">Math</option>
+                            <option value="Reading">Reading</option>
+                            <option value="Science">Science</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deck Grid -->
+            <div id="decks-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Decks will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clone text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">No flashcard decks yet</h3>
+                <p class="text-gray-500 mb-4">Create a new deck or generate flashcards from a topic to get started.</p>
+                <button class="btn btn-primary" onclick="document.getElementById('create-deck-btn').click()">
+                    <i class="fas fa-plus"></i> Create Your First Deck
+                </button>
+            </div>
+        </div>
+
+        <!-- View: Study Mode -->
+        <div id="study-view" class="hidden">
+            <div class="mb-4 flex items-center justify-between">
+                <button id="exit-study-btn" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Decks
+                </button>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="shuffle-toggle" class="form-checkbox">
+                        <span class="text-sm">Shuffle</span>
+                    </label>
+                    <span id="card-counter" class="text-sm text-gray-500">Card 1 of 10</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress mb-6">
+                <div id="study-progress" class="progress-bar" style="width: 0%"></div>
+            </div>
+
+            <!-- Flashcard -->
+            <div class="flashcard" id="flashcard">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div id="card-front-content">Click to flip</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div id="card-back-content">Answer</div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-gray-500 text-sm mt-4">
+                <i class="fas fa-keyboard mr-1"></i> 
+                Space: Flip | ←→: Navigate | 1-4: Rate
+            </p>
+
+            <!-- Rating Buttons (shown after flip) -->
+            <div id="rating-buttons" class="hidden mt-6 flex justify-center gap-3">
+                <button class="btn btn-danger px-6" data-rating="1">
+                    <span class="text-xs mr-1">[1]</span> Again
+                </button>
+                <button class="btn btn-outline px-6" data-rating="2" style="border-color: #f59e0b; color: #d97706;">
+                    <span class="text-xs mr-1">[2]</span> Hard
+                </button>
+                <button class="btn btn-success px-6" data-rating="3">
+                    <span class="text-xs mr-1">[3]</span> Good
+                </button>
+                <button class="btn btn-primary px-6" data-rating="4">
+                    <span class="text-xs mr-1">[4]</span> Easy
+                </button>
+            </div>
+        </div>
+
+        <!-- View: Study Complete -->
+        <div id="study-complete-view" class="hidden">
+            <div class="card max-w-md mx-auto text-center">
+                <div class="card-body py-8">
+                    <div class="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-success text-4xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Session Complete!</h2>
+                    <p class="text-gray-500 mb-6">Great job reviewing your flashcards.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-primary" id="cards-reviewed">0</div>
+                            <div class="text-sm text-gray-500">Cards Reviewed</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-success" id="mastered-count">0</div>
+                            <div class="text-sm text-gray-500">Mastered</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 justify-center">
+                        <button id="study-again-btn" class="btn btn-primary">
+                            <i class="fas fa-redo"></i> Study Again
+                        </button>
+                        <button id="back-to-decks-btn" class="btn btn-outline">
+                            Back to Decks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Edit Deck -->
+        <div id="edit-view" class="hidden">
+            <div class="mb-4">
+                <button id="back-from-edit-btn" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Decks
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold" id="edit-title">Edit Deck</h3>
+                </div>
+                <div class="card-body">
+                    <form id="deck-form">
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div class="form-group">
+                                <label class="form-label">Deck Title</label>
+                                <input type="text" id="deck-title" class="form-input" placeholder="e.g., Algebra Formulas" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Subject</label>
+                                <select id="deck-subject" class="form-select">
+                                    <option value="General">General</option>
+                                    <option value="English">English</option>
+                                    <option value="Math">Math</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Science">Science</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Cards List -->
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium">Cards</h4>
+                                <button type="button" id="add-card-btn" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-plus"></i> Add Card
+                                </button>
+                            </div>
+                            <div id="cards-list" class="space-y-3">
+                                <!-- Cards will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Bulk Import -->
+                        <div class="mb-6">
+                            <button type="button" id="toggle-bulk-import" class="text-primary text-sm hover:underline">
+                                <i class="fas fa-file-import"></i> Bulk Import Cards
+                            </button>
+                            <div id="bulk-import-section" class="hidden mt-3">
+                                <label class="form-label">Paste cards (format: front | back)</label>
+                                <textarea id="bulk-import-text" class="form-input" rows="5" placeholder="What is 2+2? | 4&#10;Capital of France | Paris"></textarea>
+                                <button type="button" id="import-cards-btn" class="btn btn-sm btn-outline mt-2">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Deck
+                            </button>
+                            <button type="button" id="cancel-edit-btn" class="btn btn-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generate from Topic Modal -->
+    <div id="generate-topic-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="font-semibold">Generate Flashcards from Topic</h3>
+                <button class="modal-close text-gray-400 hover:text-gray-600" onclick="closeModal('generate-topic-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="generate-topic-form">
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <select id="gen-subject" class="form-select">
+                            <option value="English">English</option>
+                            <option value="Math">Math</option>
+                            <option value="Reading">Reading</option>
+                            <option value="Science">Science</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Topic</label>
+                        <input type="text" id="gen-topic" class="form-input" placeholder="e.g., Quadratic Equations" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Number of Cards</label>
+                        <select id="gen-count" class="form-select">
+                            <option value="5">5 cards</option>
+                            <option value="10" selected>10 cards</option>
+                            <option value="15">15 cards</option>
+                            <option value="20">20 cards</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AI Model</label>
+                        <select id="gen-model" class="form-select">
+                            <option value="deepseek-v3">DeepSeek V3.2 (Recommended)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('generate-topic-modal')">Cancel</button>
+                <button type="button" id="generate-topic-submit" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="font-semibold">Delete Deck</h3>
+                <button class="modal-close text-gray-400 hover:text-gray-600" onclick="closeModal('delete-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this deck? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('delete-modal')">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Loading, Format } = window.ACT;
+
+        // State
+        let decks = [];
+        let lessons = [];
+        let currentDeck = null;
+        let studyCards = [];
+        let currentCardIndex = 0;
+        let isFlipped = false;
+        let sessionStats = { reviewed: 0, mastered: 0 };
+        let editMode = 'create'; // 'create' or 'edit'
+        let editCards = [];
+        let deckToDelete = null;
+
+        // Initialize
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/flashcards';
+                return;
+            }
+
+            window.ACT.updateUserUI(user);
+            
+            await Promise.all([loadDecks(), loadLessons(), loadModels()]);
+            setupEventListeners();
+        }
+
+        async function loadDecks() {
+            try {
+                const response = await API.get('/api/flashcards');
+                decks = response.data.decks;
+                renderDecks();
+            } catch (error) {
+                Toast.error('Failed to load decks');
+            }
+        }
+
+        async function loadLessons() {
+            try {
+                const response = await API.get('/api/lessons?limit=50');
+                lessons = response.data.items.filter(l => l.completed);
+                renderLessonDropdown();
+            } catch (error) {
+                console.error('Failed to load lessons:', error);
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const response = await API.get('/api/lessons/models');
+                const select = document.getElementById('gen-model');
+                select.innerHTML = response.data.models.map(m => 
+                    `<option value="${m.key}">${m.name}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+
+        function renderDecks() {
+            const grid = document.getElementById('decks-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const subjectFilter = document.getElementById('filter-subject').value;
+
+            let filteredDecks = decks.filter(deck => {
+                const matchesSearch = deck.title.toLowerCase().includes(searchTerm) ||
+                                     (deck.topic && deck.topic.toLowerCase().includes(searchTerm));
+                const matchesSubject = !subjectFilter || deck.subject === subjectFilter;
+                return matchesSearch && matchesSubject;
+            });
+
+            if (filteredDecks.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filteredDecks.map(deck => {
+                const total = deck.cardCount;
+                const masteryPercent = total > 0 ? Math.round((deck.masteredCount / total) * 100) : 0;
+                const learningPercent = total > 0 ? Math.round((deck.learningCount / total) * 100) : 0;
+                const familiarPercent = total > 0 ? Math.round((deck.familiarCount / total) * 100) : 0;
+
+                return `
+                    <div class="card hover:shadow-lg transition cursor-pointer" data-deck-id="${deck.id}">
+                        <div class="card-body">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="font-semibold">${escapeHtml(deck.title)}</h3>
+                                    <span class="badge badge-${getSubjectBadgeClass(deck.subject)}">${deck.subject}</span>
+                                </div>
+                                <div class="text-2xl font-bold text-gray-300">${deck.cardCount}</div>
+                            </div>
+                            
+                            <div class="text-sm text-gray-500 mb-3">
+                                ${deck.lastStudied ? `Last studied ${Format.relative(deck.lastStudied)}` : 'Never studied'}
+                            </div>
+                            
+                            <!-- Mastery Progress -->
+                            <div class="flex h-2 rounded-full overflow-hidden bg-gray-100 mb-2">
+                                <div class="bg-danger" style="width: ${learningPercent}%"></div>
+                                <div class="bg-warning" style="width: ${familiarPercent}%"></div>
+                                <div class="bg-success" style="width: ${masteryPercent}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mb-4">
+                                <span><span class="inline-block w-2 h-2 rounded-full bg-danger mr-1"></span>Learning: ${deck.learningCount}</span>
+                                <span><span class="inline-block w-2 h-2 rounded-full bg-warning mr-1"></span>Familiar: ${deck.familiarCount}</span>
+                                <span><span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>Mastered: ${deck.masteredCount}</span>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary btn-sm flex-1 study-btn" data-id="${deck.id}">
+                                    <i class="fas fa-play"></i> Study
+                                </button>
+                                <button class="btn btn-outline btn-sm edit-btn" data-id="${deck.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm delete-btn" data-id="${deck.id}" style="color: #ef4444; border-color: #ef4444;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Attach event listeners
+            grid.querySelectorAll('.study-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    startStudy(btn.dataset.id);
+                });
+            });
+
+            grid.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditDeck(btn.dataset.id);
+                });
+            });
+
+            grid.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    confirmDelete(btn.dataset.id);
+                });
+            });
+        }
+
+        function renderLessonDropdown() {
+            const list = document.getElementById('lesson-list');
+            if (lessons.length === 0) {
+                list.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-book-open mb-2"></i>
+                        <p class="text-sm">No completed lessons yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = lessons.map(lesson => `
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 border-b lesson-item" data-id="${lesson.id}">
+                    <div class="font-medium text-sm">${escapeHtml(lesson.title)}</div>
+                    <div class="text-xs text-gray-500">${lesson.subject} • ${lesson.topic}</div>
+                </button>
+            `).join('');
+
+            list.querySelectorAll('.lesson-item').forEach(item => {
+                item.addEventListener('click', () => generateFromLesson(item.dataset.id));
+            });
+        }
+
+        function getSubjectBadgeClass(subject) {
+            const classes = {
+                'English': 'primary',
+                'Math': 'success',
+                'Reading': 'warning',
+                'Science': 'secondary',
+                'General': 'primary'
+            };
+            return classes[subject] || 'primary';
+        }
+
+        // Study Mode
+        async function startStudy(deckId) {
+            try {
+                Loading.show('Loading cards...');
+                const response = await API.get(`/api/flashcards/${deckId}`);
+                currentDeck = response.data.deck;
+                
+                if (currentDeck.cards.length === 0) {
+                    Toast.error('This deck has no cards to study');
+                    Loading.hide();
+                    return;
+                }
+
+                studyCards = [...currentDeck.cards];
+                if (document.getElementById('shuffle-toggle').checked) {
+                    shuffleArray(studyCards);
+                }
+                
+                currentCardIndex = 0;
+                isFlipped = false;
+                sessionStats = { reviewed: 0, mastered: 0 };
+
+                showView('study');
+                renderCard();
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to load deck');
+            }
+        }
+
+        function renderCard() {
+            if (currentCardIndex >= studyCards.length) {
+                showStudyComplete();
+                return;
+            }
+
+            const card = studyCards[currentCardIndex];
+            document.getElementById('card-front-content').innerHTML = card.front;
+            document.getElementById('card-back-content').innerHTML = card.back;
+            document.getElementById('card-counter').textContent = `Card ${currentCardIndex + 1} of ${studyCards.length}`;
+            
+            const progress = ((currentCardIndex) / studyCards.length) * 100;
+            document.getElementById('study-progress').style.width = `${progress}%`;
+
+            // Reset flip state
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            isFlipped = false;
+            document.getElementById('rating-buttons').classList.add('hidden');
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+
+            if (isFlipped) {
+                document.getElementById('rating-buttons').classList.remove('hidden');
+            } else {
+                document.getElementById('rating-buttons').classList.add('hidden');
+            }
+        }
+
+        async function rateCard(rating) {
+            const card = studyCards[currentCardIndex];
+            
+            try {
+                const response = await API.post(`/api/flashcards/${currentDeck.id}/cards/${card.id}/review`, { rating });
+                
+                sessionStats.reviewed++;
+                if (response.data.card.mastery === 'mastered') {
+                    sessionStats.mastered++;
+                }
+                
+                // Update local card state
+                card.mastery = response.data.card.mastery;
+                
+                // Move to next card
+                currentCardIndex++;
+                renderCard();
+            } catch (error) {
+                Toast.error('Failed to save rating');
+            }
+        }
+
+        function navigateCards(direction) {
+            if (direction === 'prev' && currentCardIndex > 0) {
+                currentCardIndex--;
+                renderCard();
+            } else if (direction === 'next' && currentCardIndex < studyCards.length - 1) {
+                currentCardIndex++;
+                renderCard();
+            }
+        }
+
+        function showStudyComplete() {
+            document.getElementById('cards-reviewed').textContent = sessionStats.reviewed;
+            document.getElementById('mastered-count').textContent = sessionStats.mastered;
+            showView('study-complete');
+        }
+
+        // Edit Mode
+        function openCreateDeck() {
+            editMode = 'create';
+            currentDeck = null;
+            editCards = [{ front: '', back: '' }];
+            
+            document.getElementById('edit-title').textContent = 'Create New Deck';
+            document.getElementById('deck-title').value = '';
+            document.getElementById('deck-subject').value = 'General';
+            
+            renderEditCards();
+            showView('edit');
+        }
+
+        async function openEditDeck(deckId) {
+            try {
+                Loading.show('Loading deck...');
+                const response = await API.get(`/api/flashcards/${deckId}`);
+                currentDeck = response.data.deck;
+                editMode = 'edit';
+                
+                editCards = currentDeck.cards.map(c => ({
+                    id: c.id,
+                    front: c.front,
+                    back: c.back
+                }));
+
+                document.getElementById('edit-title').textContent = 'Edit Deck';
+                document.getElementById('deck-title').value = currentDeck.title;
+                document.getElementById('deck-subject').value = currentDeck.subject;
+                
+                renderEditCards();
+                showView('edit');
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to load deck');
+            }
+        }
+
+        function renderEditCards() {
+            const container = document.getElementById('cards-list');
+            container.innerHTML = editCards.map((card, index) => `
+                <div class="p-4 bg-gray-50 rounded-lg card-item" data-index="${index}">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-500">Card ${index + 1}</span>
+                        <button type="button" class="text-danger hover:text-red-700 delete-card-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500">Front</label>
+                            <textarea class="form-input card-front" data-index="${index}" rows="2" placeholder="Question or term">${escapeHtml(card.front)}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Back</label>
+                            <textarea class="form-input card-back" data-index="${index}" rows="2" placeholder="Answer or definition">${escapeHtml(card.back)}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach event listeners
+            container.querySelectorAll('.card-front').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    editCards[e.target.dataset.index].front = e.target.value;
+                });
+            });
+
+            container.querySelectorAll('.card-back').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    editCards[e.target.dataset.index].back = e.target.value;
+                });
+            });
+
+            container.querySelectorAll('.delete-card-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    editCards.splice(index, 1);
+                    renderEditCards();
+                });
+            });
+        }
+
+        function addCard() {
+            editCards.push({ front: '', back: '' });
+            renderEditCards();
+            // Scroll to bottom
+            const container = document.getElementById('cards-list');
+            container.lastElementChild?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function importBulkCards() {
+            const text = document.getElementById('bulk-import-text').value;
+            if (!text.trim()) {
+                Toast.error('Please enter some cards to import');
+                return;
+            }
+
+            const lines = text.trim().split('\n');
+            let imported = 0;
+            
+            lines.forEach(line => {
+                const parts = line.split('|').map(p => p.trim());
+                if (parts.length >= 2 && parts[0] && parts[1]) {
+                    editCards.push({ front: parts[0], back: parts[1] });
+                    imported++;
+                }
+            });
+
+            if (imported > 0) {
+                renderEditCards();
+                document.getElementById('bulk-import-text').value = '';
+                Toast.success(`Imported ${imported} cards`);
+            } else {
+                Toast.error('No valid cards found. Use format: front | back');
+            }
+        }
+
+        async function saveDeck() {
+            const title = document.getElementById('deck-title').value.trim();
+            const subject = document.getElementById('deck-subject').value;
+            
+            if (!title) {
+                Toast.error('Please enter a deck title');
+                return;
+            }
+
+            // Filter out empty cards
+            const validCards = editCards.filter(c => c.front.trim() && c.back.trim());
+            
+            if (validCards.length === 0) {
+                Toast.error('Please add at least one card with front and back content');
+                return;
+            }
+
+            try {
+                Loading.show('Saving deck...');
+                
+                if (editMode === 'create') {
+                    await API.post('/api/flashcards', {
+                        title,
+                        subject,
+                        cards: validCards.map(c => ({ front: c.front, back: c.back }))
+                    });
+                    Toast.success('Deck created successfully');
+                } else {
+                    // Update deck info
+                    await API.put(`/api/flashcards/${currentDeck.id}`, { title, subject });
+                    
+                    // Handle card updates
+                    const existingCardIds = currentDeck.cards.map(c => c.id);
+                    
+                    for (const card of validCards) {
+                        if (card.id && existingCardIds.includes(card.id)) {
+                            // Update existing card
+                            await API.put(`/api/flashcards/${currentDeck.id}/cards/${card.id}`, {
+                                front: card.front,
+                                back: card.back
+                            });
+                        } else {
+                            // Add new card
+                            await API.post(`/api/flashcards/${currentDeck.id}/cards`, {
+                                front: card.front,
+                                back: card.back
+                            });
+                        }
+                    }
+                    
+                    // Delete removed cards
+                    const editCardIds = validCards.filter(c => c.id).map(c => c.id);
+                    for (const card of currentDeck.cards) {
+                        if (!editCardIds.includes(card.id)) {
+                            await API.delete(`/api/flashcards/${currentDeck.id}/cards/${card.id}`);
+                        }
+                    }
+                    
+                    Toast.success('Deck updated successfully');
+                }
+                
+                await loadDecks();
+                showView('library');
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to save deck');
+            }
+        }
+
+        // Generate from lesson
+        async function generateFromLesson(lessonId) {
+            document.getElementById('lesson-dropdown').classList.add('hidden');
+            
+            const lesson = lessons.find(l => l.id === lessonId);
+            if (!lesson) return;
+
+            try {
+                Loading.show('Generating flashcards from lesson...');
+                const response = await API.post('/api/flashcards/generate', {
+                    topic: lesson.topic,
+                    subject: lesson.subject,
+                    title: `${lesson.topic} Flashcards`,
+                    count: 10
+                });
+                
+                Toast.success('Flashcards generated successfully');
+                await loadDecks();
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to generate flashcards');
+            }
+        }
+
+        // Generate from topic
+        async function generateFromTopic() {
+            const topic = document.getElementById('gen-topic').value.trim();
+            const subject = document.getElementById('gen-subject').value;
+            const count = parseInt(document.getElementById('gen-count').value);
+            const model = document.getElementById('gen-model').value;
+
+            if (!topic) {
+                Toast.error('Please enter a topic');
+                return;
+            }
+
+            try {
+                closeModal('generate-topic-modal');
+                Loading.show('Generating flashcards...');
+                
+                await API.post('/api/flashcards/generate', {
+                    topic,
+                    subject,
+                    count,
+                    model,
+                    title: `${topic} Flashcards`
+                });
+                
+                Toast.success('Flashcards generated successfully');
+                await loadDecks();
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to generate flashcards');
+            }
+        }
+
+        // Delete deck
+        function confirmDelete(deckId) {
+            deckToDelete = deckId;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        async function deleteDeck() {
+            if (!deckToDelete) return;
+
+            try {
+                closeModal('delete-modal');
+                Loading.show('Deleting deck...');
+                
+                await API.delete(`/api/flashcards/${deckToDelete}`);
+                
+                Toast.success('Deck deleted');
+                deckToDelete = null;
+                await loadDecks();
+                Loading.hide();
+            } catch (error) {
+                Loading.hide();
+                Toast.error('Failed to delete deck');
+            }
+        }
+
+        // View management
+        function showView(view) {
+            document.getElementById('deck-library-view').classList.add('hidden');
+            document.getElementById('study-view').classList.add('hidden');
+            document.getElementById('study-complete-view').classList.add('hidden');
+            document.getElementById('edit-view').classList.add('hidden');
+
+            switch (view) {
+                case 'library':
+                    document.getElementById('deck-library-view').classList.remove('hidden');
+                    break;
+                case 'study':
+                    document.getElementById('study-view').classList.remove('hidden');
+                    break;
+                case 'study-complete':
+                    document.getElementById('study-complete-view').classList.remove('hidden');
+                    break;
+                case 'edit':
+                    document.getElementById('edit-view').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // Utility functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // User menu
+            document.getElementById('user-menu-btn').addEventListener('click', () => {
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                const userMenu = document.getElementById('user-menu');
+                if (!userMenu.contains(e.target)) {
+                    document.getElementById('user-dropdown').classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                await Auth.logout();
+            });
+
+            // Sidebar toggle
+            document.getElementById('sidebar-toggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+
+            // Search and filter
+            document.getElementById('search-input').addEventListener('input', renderDecks);
+            document.getElementById('filter-subject').addEventListener('change', renderDecks);
+
+            // Create deck button
+            document.getElementById('create-deck-btn').addEventListener('click', openCreateDeck);
+
+            // Generate from lesson dropdown
+            document.getElementById('generate-lesson-btn').addEventListener('click', () => {
+                document.getElementById('lesson-dropdown').classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('lesson-dropdown');
+                const btn = document.getElementById('generate-lesson-btn');
+                if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Generate from topic
+            document.getElementById('generate-topic-btn').addEventListener('click', () => {
+                document.getElementById('generate-topic-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('generate-topic-submit').addEventListener('click', generateFromTopic);
+
+            // Study mode
+            document.getElementById('flashcard').addEventListener('click', flipCard);
+            document.getElementById('exit-study-btn').addEventListener('click', () => showView('library'));
+            
+            document.getElementById('shuffle-toggle').addEventListener('change', (e) => {
+                if (studyCards.length > 0 && e.target.checked) {
+                    shuffleArray(studyCards);
+                    currentCardIndex = 0;
+                    renderCard();
+                }
+            });
+
+            // Rating buttons
+            document.querySelectorAll('#rating-buttons button').forEach(btn => {
+                btn.addEventListener('click', () => rateCard(parseInt(btn.dataset.rating)));
+            });
+
+            // Study complete
+            document.getElementById('study-again-btn').addEventListener('click', () => {
+                startStudy(currentDeck.id);
+            });
+            document.getElementById('back-to-decks-btn').addEventListener('click', () => showView('library'));
+
+            // Edit mode
+            document.getElementById('back-from-edit-btn').addEventListener('click', () => showView('library'));
+            document.getElementById('cancel-edit-btn').addEventListener('click', () => showView('library'));
+            document.getElementById('add-card-btn').addEventListener('click', addCard);
+            
+            document.getElementById('toggle-bulk-import').addEventListener('click', () => {
+                document.getElementById('bulk-import-section').classList.toggle('hidden');
+            });
+            
+            document.getElementById('import-cards-btn').addEventListener('click', importBulkCards);
+            
+            document.getElementById('deck-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveDeck();
+            });
+
+            // Delete confirmation
+            document.getElementById('confirm-delete-btn').addEventListener('click', deleteDeck);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Only in study mode
+                if (document.getElementById('study-view').classList.contains('hidden')) return;
+                
+                // Don't trigger if typing in an input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+                switch (e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        flipCard();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        navigateCards('prev');
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        navigateCards('next');
+                        break;
+                    case 'Digit1':
+                    case 'Numpad1':
+                        if (isFlipped) rateCard(1);
+                        break;
+                    case 'Digit2':
+                    case 'Numpad2':
+                        if (isFlipped) rateCard(2);
+                        break;
+                    case 'Digit3':
+                    case 'Numpad3':
+                        if (isFlipped) rateCard(3);
+                        break;
+                    case 'Digit4':
+                    case 'Numpad4':
+                        if (isFlipped) rateCard(4);
+                        break;
+                }
+            });
+
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

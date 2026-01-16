@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+            <a href="/dashboard" class="text-gray-600 hover:text-primary"><i class="fas fa-home"></i></a>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/lessons" class="sidebar-link"><i class="fas fa-book"></i> Lessons</a>
+            <a href="/quizzes" class="sidebar-link active"><i class="fas fa-question-circle"></i> Quizzes</a>
+            <a href="/tests" class="sidebar-link"><i class="fas fa-file-alt"></i> Practice Tests</a>
+            <a href="/chat" class="sidebar-link"><i class="fas fa-comments"></i> AI Tutor</a>
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            <a href="/study-plan" class="sidebar-link"><i class="fas fa-calendar-alt"></i> Study Plan</a>
+            <a href="/essays" class="sidebar-link"><i class="fas fa-pen-fancy"></i> Essay Practice</a>
+            <a href="/flashcards" class="sidebar-link"><i class="fas fa-clone"></i> Flashcards</a>
+            <a href="/progress" class="sidebar-link"><i class="fas fa-chart-line"></i> Progress</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Quizzes</h1>
+                <p class="text-gray-600">Test your knowledge with AI-generated quizzes</p>
+            </div>
+            <button id="new-quiz-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Quiz
+            </button>
+        </div>
+
+        <!-- Generate Quiz Modal Content -->
+        <div id="generate-form-container" class="hidden">
+            <form id="generate-form" class="space-y-4">
+                <div class="form-group">
+                    <label class="form-label">Subject *</label>
+                    <select name="subject" class="form-select" required>
+                        <option value="">Select a subject</option>
+                        <option value="English">English</option>
+                        <option value="Math">Math</option>
+                        <option value="Reading">Reading</option>
+                        <option value="Science">Science</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Topic (optional)</label>
+                    <input type="text" name="topic" class="form-input" placeholder="E.g., Algebra, Grammar rules">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Number of Questions: <span id="num-display">10</span></label>
+                    <input type="range" name="numQuestions" min="5" max="30" step="5" value="10" 
+                        class="w-full" oninput="document.getElementById('num-display').textContent = this.value">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select name="difficulty" class="form-select">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate" selected>Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Mixed">Mixed</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="timed" class="form-checkbox">
+                        <span>Timed Quiz</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">AI Model</label>
+                    <select name="model" id="model-select" class="form-select">
+                        <option value="deepseek-v3">DeepSeek V3.2 (Recommended)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-primary" id="total-quizzes">0</div>
+                <div class="text-sm text-gray-500">Total Quizzes</div>
+            </div>
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-success" id="avg-score">0%</div>
+                <div class="text-sm text-gray-500">Average Score</div>
+            </div>
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-secondary" id="perfect-scores">0</div>
+                <div class="text-sm text-gray-500">Perfect Scores</div>
+            </div>
+        </div>
+
+        <!-- Quizzes Grid -->
+        <div id="quizzes-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Quizzes loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-question-circle text-4xl text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">No quizzes yet</h3>
+            <p class="text-gray-600 mb-4">Generate your first quiz to test your knowledge</p>
+            <button class="btn btn-primary" onclick="document.getElementById('new-quiz-btn').click()">
+                <i class="fas fa-plus mr-2"></i> Create Quiz
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-16">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading quizzes...</p>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading, Format } = window.ACT;
+
+        let models = [];
+
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/quizzes';
+                return;
+            }
+
+            await loadModels();
+            await loadQuizzes();
+        }
+
+        async function loadModels() {
+            try {
+                const response = await API.get('/api/lessons/models');
+                models = response.data.models;
+            } catch (error) {
+                console.error('Failed to load models');
+            }
+        }
+
+        async function loadQuizzes() {
+            const container = document.getElementById('quizzes-container');
+            const emptyState = document.getElementById('empty-state');
+            const loadingState = document.getElementById('loading-state');
+
+            loadingState.classList.remove('hidden');
+            container.innerHTML = '';
+            emptyState.classList.add('hidden');
+
+            try {
+                const response = await API.get('/api/quizzes?limit=50');
+                const { items } = response.data;
+
+                loadingState.classList.add('hidden');
+
+                if (items.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                // Update stats
+                const completed = items.filter(q => q.status === 'completed');
+                document.getElementById('total-quizzes').textContent = items.length;
+                
+                if (completed.length > 0) {
+                    const avgScore = Math.round(completed.reduce((sum, q) => sum + q.score.percentage, 0) / completed.length);
+                    document.getElementById('avg-score').textContent = avgScore + '%';
+                    document.getElementById('perfect-scores').textContent = completed.filter(q => q.score.percentage === 100).length;
+                }
+
+                container.innerHTML = items.map(quiz => renderQuizCard(quiz)).join('');
+
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                Toast.error('Failed to load quizzes');
+            }
+        }
+
+        function renderQuizCard(quiz) {
+            const subjectColors = {
+                'English': 'bg-blue-100 text-blue-700',
+                'Math': 'bg-green-100 text-green-700',
+                'Reading': 'bg-yellow-100 text-yellow-700',
+                'Science': 'bg-purple-100 text-purple-700'
+            };
+
+            const statusBadge = quiz.status === 'completed' 
+                ? `<span class="badge badge-success">${quiz.score.percentage}%</span>`
+                : quiz.status === 'in_progress'
+                ? '<span class="badge badge-warning">In Progress</span>'
+                : '<span class="badge bg-gray-100">Not Started</span>';
+
+            const actionBtn = quiz.status === 'completed'
+                ? `<a href="/quiz-results/${quiz.id}" class="btn btn-outline btn-sm">View Results</a>`
+                : `<a href="/quiz/${quiz.id}" class="btn btn-primary btn-sm">Start Quiz</a>`;
+
+            return `
+                <div class="card hover:shadow-lg transition">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="badge ${subjectColors[quiz.subject] || 'bg-gray-100'}">${quiz.subject}</span>
+                            ${statusBadge}
+                        </div>
+                        <h3 class="font-semibold mb-2">${quiz.title}</h3>
+                        <div class="text-sm text-gray-500 mb-4">
+                            <span><i class="fas fa-list mr-1"></i>${quiz.questions.length} questions</span>
+                            <span class="ml-3"><i class="fas fa-signal mr-1"></i>${quiz.difficulty}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400">${Format.relative(quiz.createdAt)}</span>
+                            ${actionBtn}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // New quiz button
+        document.getElementById('new-quiz-btn').addEventListener('click', () => {
+            const formContainer = document.getElementById('generate-form-container');
+            const formClone = formContainer.cloneNode(true);
+            formClone.classList.remove('hidden');
+            formClone.id = 'modal-form-container';
+
+            // Populate models
+            const modalModel = formClone.querySelector('#model-select');
+            modalModel.innerHTML = models.map(m => 
+                `<option value="${m.key}">${m.name}</option>`
+            ).join('');
+
+            Modal.show({
+                title: 'Generate New Quiz',
+                content: formClone,
+                confirmText: 'Generate Quiz',
+                onConfirm: async () => {
+                    const form = document.querySelector('#modal-form-container form');
+                    const formData = new FormData(form);
+                    
+                    const data = {
+                        subject: formData.get('subject'),
+                        topic: formData.get('topic'),
+                        numQuestions: parseInt(formData.get('numQuestions')),
+                        difficulty: formData.get('difficulty'),
+                        timed: formData.get('timed') === 'on',
+                        model: formData.get('model')
+                    };
+
+                    if (!data.subject) {
+                        Toast.error('Please select a subject');
+                        return false;
+                    }
+
+                    const confirmBtn = document.querySelector('.modal-confirm');
+                    Loading.button(confirmBtn, true, 'Generating...');
+
+                    try {
+                        const response = await API.post('/api/quizzes/generate', data);
+                        Toast.success('Quiz generated!');
+                        window.location.href = `/quiz/${response.data.quiz.id}`;
+                    } catch (error) {
+                        Toast.error(error.message || 'Failed to generate quiz');
+                        Loading.button(confirmBtn, false);
+                        return false;
+                    }
+                }
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

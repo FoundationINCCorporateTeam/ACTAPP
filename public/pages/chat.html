@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Tutor - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50 h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm h-16 flex-shrink-0">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <span class="text-lg font-semibold">AI Tutor</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <select id="model-select" class="form-select text-sm w-auto">
+                    <option value="deepseek-v3">DeepSeek V3.2</option>
+                </select>
+                <button id="new-chat-btn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar - Conversations -->
+        <aside class="w-64 bg-white border-r hidden md:block overflow-y-auto">
+            <div class="p-4">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Conversations</h3>
+                <div id="conversations-list" class="space-y-1">
+                    <!-- Conversations will be loaded here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="flex-1 flex flex-col">
+            <!-- Messages -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Welcome message -->
+                <div id="welcome-message" class="text-center py-12">
+                    <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-robot text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">Hi! I'm your ACT AI Tutor</h2>
+                    <p class="text-gray-600 mb-6">Ask me anything about the ACT. I can help with math, English, reading, science, and writing.</p>
+                    
+                    <div class="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+                        <button class="quick-prompt p-3 text-left bg-white rounded-lg border hover:border-primary hover:shadow-md transition text-sm">
+                            <i class="fas fa-calculator text-primary mr-2"></i>
+                            Explain quadratic equations
+                        </button>
+                        <button class="quick-prompt p-3 text-left bg-white rounded-lg border hover:border-primary hover:shadow-md transition text-sm">
+                            <i class="fas fa-book text-success mr-2"></i>
+                            Help with comma rules
+                        </button>
+                        <button class="quick-prompt p-3 text-left bg-white rounded-lg border hover:border-primary hover:shadow-md transition text-sm">
+                            <i class="fas fa-flask text-secondary mr-2"></i>
+                            Reading scientific graphs
+                        </button>
+                        <button class="quick-prompt p-3 text-left bg-white rounded-lg border hover:border-primary hover:shadow-md transition text-sm">
+                            <i class="fas fa-pen text-warning mr-2"></i>
+                            ACT essay structure
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages will be added here -->
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="typing-indicator" class="hidden px-4 py-2">
+                <div class="flex items-center space-x-2 text-gray-500">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                    </div>
+                    <span class="text-sm">AI is thinking...</span>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="border-t bg-white p-4">
+                <form id="chat-form" class="flex items-end space-x-3">
+                    <div class="flex-1">
+                        <textarea id="message-input" class="form-input resize-none" rows="1" placeholder="Ask me anything about the ACT..." 
+                            style="min-height: 44px; max-height: 150px;"></textarea>
+                    </div>
+                    <button type="submit" id="send-btn" class="btn btn-primary h-11 w-11 p-0">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+                <p class="text-xs text-gray-400 mt-2 text-center">
+                    AI responses may not always be accurate. Verify important information.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Format } = window.ACT;
+
+        let currentConversation = null;
+        let conversations = [];
+        let models = [];
+
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/chat';
+                return;
+            }
+
+            await Promise.all([loadModels(), loadConversations()]);
+            setupEventListeners();
+        }
+
+        async function loadModels() {
+            try {
+                const response = await API.get('/api/lessons/models');
+                models = response.data.models;
+                
+                const select = document.getElementById('model-select');
+                select.innerHTML = models.map(m => 
+                    `<option value="${m.key}">${m.name}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+
+        async function loadConversations() {
+            try {
+                const response = await API.get('/api/chat/conversations');
+                conversations = response.data.conversations;
+                renderConversationsList();
+            } catch (error) {
+                console.error('Failed to load conversations:', error);
+            }
+        }
+
+        function renderConversationsList() {
+            const container = document.getElementById('conversations-list');
+            
+            if (conversations.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No conversations yet</p>';
+                return;
+            }
+
+            container.innerHTML = conversations.map(conv => `
+                <button class="w-full text-left p-2 rounded-lg hover:bg-gray-100 transition ${currentConversation?.id === conv.id ? 'bg-primary/10' : ''}"
+                    onclick="loadConversation('${conv.id}')">
+                    <div class="text-sm font-medium truncate">${conv.title}</div>
+                    <div class="text-xs text-gray-500">${Format.relative(conv.updatedAt)}</div>
+                </button>
+            `).join('');
+        }
+
+        async function loadConversation(id) {
+            try {
+                const response = await API.get(`/api/chat/conversations/${id}`);
+                currentConversation = response.data.conversation;
+                renderMessages();
+                renderConversationsList();
+            } catch (error) {
+                Toast.error('Failed to load conversation');
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages-container');
+            const welcome = document.getElementById('welcome-message');
+            
+            if (!currentConversation || currentConversation.messages.length === 0) {
+                welcome.classList.remove('hidden');
+                return;
+            }
+
+            welcome.classList.add('hidden');
+            
+            // Keep only messages, remove welcome
+            const existingMessages = container.querySelectorAll('.chat-message');
+            existingMessages.forEach(el => el.remove());
+
+            currentConversation.messages.forEach(msg => {
+                container.appendChild(createMessageElement(msg));
+            });
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]);
+            }
+        }
+
+        function createMessageElement(message) {
+            const div = document.createElement('div');
+            div.className = `chat-message ${message.role === 'user' ? 'chat-message-user' : ''}`;
+            
+            const avatar = message.role === 'user' 
+                ? '<div class="chat-avatar bg-primary text-white"><i class="fas fa-user"></i></div>'
+                : '<div class="chat-avatar bg-gradient-to-r from-primary to-secondary text-white"><i class="fas fa-robot"></i></div>';
+
+            const bubbleClass = message.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+            
+            // Parse markdown for AI messages
+            let content = message.content;
+            if (message.role === 'assistant') {
+                content = marked.parse(content);
+            }
+
+            div.innerHTML = `
+                ${avatar}
+                <div class="chat-bubble ${bubbleClass}">
+                    <div class="message-content">${content}</div>
+                    <div class="text-xs opacity-60 mt-1">${Format.time(message.timestamp)}</div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        async function sendMessage(content) {
+            const container = document.getElementById('messages-container');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const welcome = document.getElementById('welcome-message');
+
+            // Hide welcome message
+            welcome.classList.add('hidden');
+
+            // Create conversation if needed
+            if (!currentConversation) {
+                try {
+                    const response = await API.post('/api/chat/conversations', {
+                        title: content.slice(0, 50),
+                        model: document.getElementById('model-select').value
+                    });
+                    currentConversation = response.data.conversation;
+                    conversations.unshift({
+                        id: currentConversation.id,
+                        title: currentConversation.title,
+                        updatedAt: currentConversation.updatedAt
+                    });
+                    renderConversationsList();
+                } catch (error) {
+                    Toast.error('Failed to create conversation');
+                    return;
+                }
+            }
+
+            // Add user message to UI
+            const userMessage = {
+                id: Date.now(),
+                role: 'user',
+                content,
+                timestamp: new Date().toISOString()
+            };
+            container.appendChild(createMessageElement(userMessage));
+            container.scrollTop = container.scrollHeight;
+
+            // Show typing indicator
+            typingIndicator.classList.remove('hidden');
+
+            try {
+                const response = await API.post(`/api/chat/conversations/${currentConversation.id}/messages`, {
+                    content,
+                    model: document.getElementById('model-select').value
+                });
+
+                // Hide typing indicator
+                typingIndicator.classList.add('hidden');
+
+                // Add AI message
+                container.appendChild(createMessageElement(response.data.aiMessage));
+                container.scrollTop = container.scrollHeight;
+
+                // Update conversation in list
+                currentConversation.messages.push(userMessage, response.data.aiMessage);
+
+                // Render MathJax
+                if (window.MathJax) {
+                    MathJax.typesetPromise([container]);
+                }
+
+            } catch (error) {
+                typingIndicator.classList.add('hidden');
+                Toast.error(error.message || 'Failed to get response');
+            }
+        }
+
+        function setupEventListeners() {
+            // Chat form
+            document.getElementById('chat-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('message-input');
+                const content = input.value.trim();
+                
+                if (!content) return;
+                
+                input.value = '';
+                input.style.height = '44px';
+                
+                await sendMessage(content);
+            });
+
+            // Auto-resize textarea
+            const textarea = document.getElementById('message-input');
+            textarea.addEventListener('input', function() {
+                this.style.height = '44px';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+
+            // Enter to send (Shift+Enter for new line)
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Quick prompts
+            document.querySelectorAll('.quick-prompt').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    sendMessage(text);
+                });
+            });
+
+            // New chat
+            document.getElementById('new-chat-btn').addEventListener('click', () => {
+                currentConversation = null;
+                document.getElementById('welcome-message').classList.remove('hidden');
+                document.querySelectorAll('.chat-message').forEach(el => el.remove());
+                renderConversationsList();
+            });
+        }
+
+        // Make loadConversation global
+        window.loadConversation = loadConversation;
+
+        init();
+    </script>
+</body>
+</html>

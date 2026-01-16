@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <a href="/quizzes" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <span class="font-semibold">Quiz Results</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="retry-btn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-20 pb-12 max-w-4xl mx-auto px-4">
+        <!-- Loading -->
+        <div id="loading-state" class="text-center py-16">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading results...</p>
+        </div>
+
+        <!-- Results Content -->
+        <div id="results-container" class="hidden">
+            <!-- Score Card -->
+            <div class="card mb-6 text-center py-8" id="score-card">
+                <div id="score-display" class="text-6xl font-bold mb-2">0%</div>
+                <div id="score-detail" class="text-xl text-gray-600 mb-4">0 / 0 correct</div>
+                <div id="time-spent" class="text-sm text-gray-500"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-success" id="correct-count">0</div>
+                    <div class="text-sm text-gray-500">Correct</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-danger" id="incorrect-count">0</div>
+                    <div class="text-sm text-gray-500">Incorrect</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-400" id="skipped-count">0</div>
+                    <div class="text-sm text-gray-500">Skipped</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <canvas id="results-chart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Question Review -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold">Question Review</h3>
+                </div>
+                <div id="questions-review" class="divide-y"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Format } = window.ACT;
+
+        let quiz = null;
+
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const pathParts = window.location.pathname.split('/');
+            const quizId = pathParts[pathParts.length - 1];
+
+            if (!quizId) {
+                window.location.href = '/quizzes';
+                return;
+            }
+
+            await loadResults(quizId);
+        }
+
+        async function loadResults(id) {
+            try {
+                const response = await API.get(`/api/quizzes/${id}/results`);
+                quiz = response.data.quiz;
+
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('results-container').classList.remove('hidden');
+
+                renderResults();
+
+            } catch (error) {
+                Toast.error('Failed to load results');
+                setTimeout(() => window.location.href = '/quizzes', 2000);
+            }
+        }
+
+        function renderResults() {
+            const score = quiz.score;
+            
+            // Score display
+            const scoreCard = document.getElementById('score-card');
+            if (score.percentage >= 80) {
+                scoreCard.classList.add('bg-success/10');
+            } else if (score.percentage >= 60) {
+                scoreCard.classList.add('bg-warning/10');
+            } else {
+                scoreCard.classList.add('bg-danger/10');
+            }
+
+            document.getElementById('score-display').textContent = `${score.percentage}%`;
+            document.getElementById('score-detail').textContent = `${score.correct} / ${score.total} correct`;
+            
+            if (quiz.timeSpent) {
+                document.getElementById('time-spent').textContent = `Time: ${Format.duration(quiz.timeSpent)}`;
+            }
+
+            document.getElementById('correct-count').textContent = score.correct;
+            document.getElementById('incorrect-count').textContent = score.incorrect;
+            document.getElementById('skipped-count').textContent = score.skipped;
+
+            // Chart
+            new Chart(document.getElementById('results-chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Incorrect', 'Skipped'],
+                    datasets: [{
+                        data: [score.correct, score.incorrect, score.skipped],
+                        backgroundColor: ['#10b981', '#ef4444', '#9ca3af']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Questions review
+            const container = document.getElementById('questions-review');
+            container.innerHTML = quiz.questions.map((q, i) => {
+                const isCorrect = q.status === 'correct';
+                const isSkipped = q.status === 'skipped';
+                
+                return `
+                    <div class="p-4 ${isCorrect ? 'bg-success/5' : isSkipped ? 'bg-gray-50' : 'bg-danger/5'}">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="badge ${isCorrect ? 'badge-success' : isSkipped ? 'bg-gray-100' : 'badge-danger'}">
+                                ${isCorrect ? '✓ Correct' : isSkipped ? 'Skipped' : '✗ Incorrect'}
+                            </span>
+                            <span class="text-sm text-gray-500">Question ${i + 1}</span>
+                        </div>
+                        <div class="mb-4 question-text">${q.question}</div>
+                        <div class="space-y-2 mb-4">
+                            ${Object.entries(q.options).map(([key, value]) => {
+                                let classes = 'p-3 rounded-lg border ';
+                                if (key === q.correctAnswer) {
+                                    classes += 'border-success bg-success/10';
+                                } else if (key === q.userAnswer && key !== q.correctAnswer) {
+                                    classes += 'border-danger bg-danger/10';
+                                } else {
+                                    classes += 'border-gray-200';
+                                }
+                                return `
+                                    <div class="${classes}">
+                                        <span class="font-semibold mr-2">${key}.</span> ${value}
+                                        ${key === q.correctAnswer ? '<span class="text-success ml-2">(Correct)</span>' : ''}
+                                        ${key === q.userAnswer && key !== q.correctAnswer ? '<span class="text-danger ml-2">(Your answer)</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="font-semibold text-primary mb-1">Explanation</div>
+                            <div class="text-sm text-gray-700">${q.explanation || 'No explanation available.'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]);
+            }
+        }
+
+        // Retry
+        document.getElementById('retry-btn').addEventListener('click', async () => {
+            try {
+                const response = await API.post(`/api/quizzes/${quiz.id}/retry`);
+                window.location.href = `/quiz/${response.data.quiz.id}`;
+            } catch (error) {
+                Toast.error('Failed to create retry');
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

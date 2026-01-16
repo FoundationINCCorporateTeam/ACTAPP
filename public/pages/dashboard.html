@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- XP and Level -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="text-sm font-medium">Level <span class="user-level">1</span></span>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-sm"><span class="user-xp">0</span> XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="hidden sm:flex items-center space-x-1 bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-fire"></i>
+                    <span class="text-sm font-medium"><span class="user-streak">0</span> day streak</span>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white user-avatar">
+                            <span class="text-sm font-medium">?</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border hidden" id="user-dropdown">
+                        <div class="px-4 py-3 border-b">
+                            <div class="font-medium user-name">User</div>
+                            <div class="text-sm text-gray-500 user-email">user@example.com</div>
+                        </div>
+                        <div class="py-1">
+                            <a href="/profile" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i> Profile
+                            </a>
+                            <a href="/settings" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-danger hover:bg-gray-50">
+                                <i class="fas fa-sign-out-alt w-5"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link active">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/lessons" class="sidebar-link">
+                <i class="fas fa-book"></i> Lessons
+            </a>
+            <a href="/quizzes" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Quizzes
+            </a>
+            <a href="/tests" class="sidebar-link">
+                <i class="fas fa-file-alt"></i> Practice Tests
+            </a>
+            <a href="/chat" class="sidebar-link">
+                <i class="fas fa-comments"></i> AI Tutor
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            
+            <a href="/study-plan" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i> Study Plan
+            </a>
+            <a href="/essays" class="sidebar-link">
+                <i class="fas fa-pen-fancy"></i> Essay Practice
+            </a>
+            <a href="/flashcards" class="sidebar-link">
+                <i class="fas fa-clone"></i> Flashcards
+            </a>
+            <a href="/progress" class="sidebar-link">
+                <i class="fas fa-chart-line"></i> Progress
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Account</div>
+            
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="/help" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Welcome back, <span class="user-name">Student</span>! 👋</h1>
+            <p class="text-gray-600 mt-1">Ready to continue your ACT preparation?</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Estimated Score</p>
+                        <p class="text-3xl font-bold text-primary" id="estimated-score">--</p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-trophy text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Lessons Completed</p>
+                        <p class="text-3xl font-bold" id="lessons-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book text-success text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Quizzes Taken</p>
+                        <p class="text-3xl font-bold" id="quizzes-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-question-circle text-warning text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Study Streak</p>
+                        <p class="text-3xl font-bold" id="streak-count">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-fire text-orange-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/lessons" class="card p-4 text-center hover:border-primary border-2 border-transparent transition group">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-primary group-hover:text-white transition">
+                        <i class="fas fa-plus text-primary text-xl group-hover:text-white"></i>
+                    </div>
+                    <span class="font-medium">New Lesson</span>
+                </a>
+                
+                <a href="/quizzes" class="card p-4 text-center hover:border-secondary border-2 border-transparent transition group">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-secondary group-hover:text-white transition">
+                        <i class="fas fa-brain text-secondary text-xl group-hover:text-white"></i>
+                    </div>
+                    <span class="font-medium">Take Quiz</span>
+                </a>
+                
+                <a href="/tests" class="card p-4 text-center hover:border-success border-2 border-transparent transition group">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-success group-hover:text-white transition">
+                        <i class="fas fa-file-alt text-success text-xl group-hover:text-white"></i>
+                    </div>
+                    <span class="font-medium">Practice Test</span>
+                </a>
+                
+                <a href="/chat" class="card p-4 text-center hover:border-warning border-2 border-transparent transition group">
+                    <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-warning group-hover:text-white transition">
+                        <i class="fas fa-robot text-warning text-xl group-hover:text-white"></i>
+                    </div>
+                    <span class="font-medium">AI Tutor</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Score Progress Chart -->
+            <div class="lg:col-span-2 card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-semibold">Score Progress</h3>
+                    <select id="chart-period" class="form-select text-sm w-auto">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <canvas id="progress-chart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Today's Tasks -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-semibold">Today's Tasks</h3>
+                    <a href="/study-plan" class="text-primary text-sm hover:underline">View Plan</a>
+                </div>
+                <div class="card-body p-0" id="todays-tasks">
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-calendar-check text-4xl mb-2 text-gray-300"></i>
+                        <p>No study plan yet</p>
+                        <a href="/study-plan" class="text-primary text-sm hover:underline">Create one</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance -->
+        <div class="mt-6 card">
+            <div class="card-header">
+                <h3 class="font-semibold">Subject Performance</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid md:grid-cols-4 gap-6" id="subject-performance">
+                    <!-- English -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium">English</span>
+                            <span class="text-sm text-gray-500" id="english-score">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="english-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Math -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium">Math</span>
+                            <span class="text-sm text-gray-500" id="math-score">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" id="math-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reading -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium">Reading</span>
+                            <span class="text-sm text-gray-500" id="reading-score">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-warning" id="reading-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Science -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium">Science</span>
+                            <span class="text-sm text-gray-500" id="science-score">--</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="science-bar" style="width: 0%; background: #7c3aed;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mt-6 card">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold">Recent Activity</h3>
+                <a href="/progress" class="text-primary text-sm hover:underline">View All</a>
+            </div>
+            <div class="card-body p-0" id="recent-activity">
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-history text-4xl mb-2 text-gray-300"></i>
+                    <p>No activity yet</p>
+                    <p class="text-sm">Start studying to see your progress</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Loading, Format } = window.ACT;
+
+        let progressChart = null;
+
+        // Initialize page
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/dashboard';
+                return;
+            }
+
+            // Update UI with user data
+            window.ACT.updateUserUI(user);
+            
+            // Update email in dropdown
+            document.querySelectorAll('.user-email').forEach(el => {
+                el.textContent = user.email;
+            });
+
+            // Load dashboard data
+            await loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load analytics
+                const analyticsResponse = await API.get('/api/progress/analytics');
+                const analytics = analyticsResponse.data;
+
+                // Update stats
+                document.getElementById('estimated-score').textContent = analytics.estimatedScore || '--';
+                document.getElementById('lessons-count').textContent = analytics.stats?.lessonsCompleted || 0;
+                document.getElementById('quizzes-count').textContent = analytics.stats?.quizzesTaken || 0;
+                document.getElementById('streak-count').textContent = analytics.stats?.streak || 0;
+
+                // Update subject performance
+                updateSubjectPerformance(analytics.subjects);
+
+                // Update recent activity
+                updateRecentActivity(analytics.recentActivity);
+
+                // Initialize chart
+                initProgressChart(analytics.scoreHistory);
+
+                // Load today's tasks
+                loadTodaysTasks();
+
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            }
+        }
+
+        function updateSubjectPerformance(subjects) {
+            const subjectMap = {
+                english: { scoreEl: 'english-score', barEl: 'english-bar' },
+                math: { scoreEl: 'math-score', barEl: 'math-bar' },
+                reading: { scoreEl: 'reading-score', barEl: 'reading-bar' },
+                science: { scoreEl: 'science-score', barEl: 'science-bar' }
+            };
+
+            Object.entries(subjectMap).forEach(([key, els]) => {
+                const subject = subjects?.[key];
+                if (subject && subject.score > 0) {
+                    document.getElementById(els.scoreEl).textContent = `${subject.score}%`;
+                    document.getElementById(els.barEl).style.width = `${subject.score}%`;
+                }
+            });
+        }
+
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recent-activity');
+            
+            if (!activities || activities.length === 0) {
+                return; // Keep default empty state
+            }
+
+            const activityIcons = {
+                lesson_generated: { icon: 'fa-book', color: 'text-primary', bg: 'bg-primary/10' },
+                quiz_completed: { icon: 'fa-check-circle', color: 'text-success', bg: 'bg-success/10' },
+                test_completed: { icon: 'fa-file-alt', color: 'text-secondary', bg: 'bg-secondary/10' },
+                essay_graded: { icon: 'fa-pen-fancy', color: 'text-warning', bg: 'bg-warning/10' },
+                study_session: { icon: 'fa-clock', color: 'text-gray-600', bg: 'bg-gray-100' }
+            };
+
+            container.innerHTML = activities.slice(0, 5).map(activity => {
+                const info = activityIcons[activity.type] || activityIcons.study_session;
+                let description = '';
+                
+                switch(activity.type) {
+                    case 'lesson_generated':
+                        description = `Generated lesson on ${activity.topic}`;
+                        break;
+                    case 'quiz_completed':
+                        description = `Completed ${activity.subject} quiz - ${activity.score}%`;
+                        break;
+                    case 'test_completed':
+                        description = `Completed practice test - Score: ${activity.compositeScore}`;
+                        break;
+                    case 'essay_graded':
+                        description = `Essay graded - Score: ${activity.score}/12`;
+                        break;
+                    case 'study_session':
+                        description = `Studied for ${activity.minutes} minutes`;
+                        break;
+                    default:
+                        description = activity.type;
+                }
+
+                return `
+                    <div class="flex items-center px-4 py-3 border-b last:border-b-0 hover:bg-gray-50">
+                        <div class="w-10 h-10 ${info.bg} rounded-full flex items-center justify-center mr-3">
+                            <i class="fas ${info.icon} ${info.color}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${description}</p>
+                            <p class="text-xs text-gray-500">${Format.relative(activity.timestamp)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadTodaysTasks() {
+            try {
+                const response = await API.get('/api/study-plans/today');
+                const { tasks, hasPlan } = response.data;
+                
+                const container = document.getElementById('todays-tasks');
+                
+                if (!hasPlan || tasks.length === 0) {
+                    return; // Keep default empty state
+                }
+
+                container.innerHTML = tasks.map(task => `
+                    <div class="flex items-center px-4 py-3 border-b last:border-b-0">
+                        <input type="checkbox" class="form-checkbox mr-3" ${task.completed ? 'checked' : ''}>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${task.activity || task.subject}</p>
+                            <p class="text-xs text-gray-500">${task.time || 'Flexible'}</p>
+                        </div>
+                        <span class="badge badge-${task.subject?.toLowerCase() === 'math' ? 'success' : task.subject?.toLowerCase() === 'english' ? 'primary' : 'warning'}">
+                            ${task.subject || 'Study'}
+                        </span>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Failed to load today\'s tasks:', error);
+            }
+        }
+
+        function initProgressChart(scoreHistory) {
+            const ctx = document.getElementById('progress-chart').getContext('2d');
+            
+            // Prepare data
+            const labels = [];
+            const data = [];
+            
+            if (scoreHistory && scoreHistory.length > 0) {
+                scoreHistory.slice(-10).forEach(item => {
+                    labels.push(Format.date(item.date, { month: 'short', day: 'numeric' }));
+                    data.push(item.score);
+                });
+            } else {
+                // Show demo data
+                const now = new Date();
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    labels.push(Format.date(date, { month: 'short', day: 'numeric' }));
+                    data.push(0);
+                }
+            }
+
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Score',
+                        data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // User menu toggle
+        document.getElementById('user-menu-btn').addEventListener('click', () => {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const userMenu = document.getElementById('user-menu');
+            if (!userMenu.contains(e.target)) {
+                document.getElementById('user-dropdown').classList.add('hidden');
+            }
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await Auth.logout();
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

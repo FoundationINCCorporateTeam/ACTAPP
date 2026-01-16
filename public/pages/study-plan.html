@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Plan - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- XP and Level -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="text-sm font-medium">Level <span class="user-level">1</span></span>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-sm"><span class="user-xp">0</span> XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="hidden sm:flex items-center space-x-1 bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-fire"></i>
+                    <span class="text-sm font-medium"><span class="user-streak">0</span> day streak</span>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white user-avatar">
+                            <span class="text-sm font-medium">?</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border hidden" id="user-dropdown">
+                        <div class="px-4 py-3 border-b">
+                            <div class="font-medium user-name">User</div>
+                            <div class="text-sm text-gray-500 user-email">user@example.com</div>
+                        </div>
+                        <div class="py-1">
+                            <a href="/profile" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i> Profile
+                            </a>
+                            <a href="/settings" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-danger hover:bg-gray-50">
+                                <i class="fas fa-sign-out-alt w-5"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/lessons" class="sidebar-link">
+                <i class="fas fa-book"></i> Lessons
+            </a>
+            <a href="/quizzes" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Quizzes
+            </a>
+            <a href="/tests" class="sidebar-link">
+                <i class="fas fa-file-alt"></i> Practice Tests
+            </a>
+            <a href="/chat" class="sidebar-link">
+                <i class="fas fa-comments"></i> AI Tutor
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            
+            <a href="/study-plan" class="sidebar-link active">
+                <i class="fas fa-calendar-alt"></i> Study Plan
+            </a>
+            <a href="/essays" class="sidebar-link">
+                <i class="fas fa-pen-fancy"></i> Essay Practice
+            </a>
+            <a href="/flashcards" class="sidebar-link">
+                <i class="fas fa-clone"></i> Flashcards
+            </a>
+            <a href="/progress" class="sidebar-link">
+                <i class="fas fa-chart-line"></i> Progress
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Account</div>
+            
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="/help" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Study Plan Generator</h1>
+            <p class="text-gray-600 mt-1">Create a personalized study plan tailored to your goals and schedule.</p>
+        </div>
+
+        <!-- No Plan View (Generate Form) -->
+        <div id="no-plan-view" class="hidden">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="font-semibold flex items-center gap-2">
+                        <i class="fas fa-magic text-primary"></i>
+                        Create Your Personalized Study Plan
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form id="study-plan-form" class="space-y-6">
+                        <!-- Current Score -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="form-label">Current ACT Score</label>
+                                <div class="flex items-center gap-4">
+                                    <input type="number" id="current-score" class="form-input" min="1" max="36" placeholder="1-36">
+                                    <label class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+                                        <input type="checkbox" id="no-score-yet" class="form-checkbox">
+                                        Haven't taken yet
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Target Score -->
+                            <div class="form-group">
+                                <label class="form-label">Target ACT Score: <span id="target-score-value" class="text-primary font-semibold">30</span></label>
+                                <input type="range" id="target-score" class="w-full" min="1" max="36" value="30">
+                            </div>
+                        </div>
+
+                        <!-- Test Date and Study Hours -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="form-label">Test Date</label>
+                                <input type="date" id="test-date" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Available Study Hours Per Day: <span id="study-hours-value" class="text-primary font-semibold">2</span></label>
+                                <input type="range" id="study-hours" class="w-full" min="0" max="8" value="2" step="0.5">
+                            </div>
+                        </div>
+
+                        <!-- Days Available -->
+                        <div class="form-group">
+                            <label class="form-label">Days Available Per Week</label>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="monday" class="form-checkbox" checked>
+                                    <span>Mon</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="tuesday" class="form-checkbox" checked>
+                                    <span>Tue</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="wednesday" class="form-checkbox" checked>
+                                    <span>Wed</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="thursday" class="form-checkbox" checked>
+                                    <span>Thu</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="friday" class="form-checkbox" checked>
+                                    <span>Fri</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="saturday" class="form-checkbox">
+                                    <span>Sat</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+                                    <input type="checkbox" name="days" value="sunday" class="form-checkbox">
+                                    <span>Sun</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Subjects -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="form-label">Weak Subjects (need more focus)</label>
+                                <select id="weak-subjects" class="form-select" multiple size="5">
+                                    <option value="english">English</option>
+                                    <option value="math">Math</option>
+                                    <option value="reading">Reading</option>
+                                    <option value="science">Science</option>
+                                    <option value="writing">Writing</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Strong Subjects</label>
+                                <select id="strong-subjects" class="form-select" multiple size="5">
+                                    <option value="english">English</option>
+                                    <option value="math">Math</option>
+                                    <option value="reading">Reading</option>
+                                    <option value="science">Science</option>
+                                    <option value="writing">Writing</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                            </div>
+                        </div>
+
+                        <!-- Learning Style -->
+                        <div class="form-group">
+                            <label class="form-label">Learning Style</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center gap-2 p-4 border rounded-lg cursor-pointer hover:border-primary transition">
+                                    <input type="radio" name="learning-style" value="visual" class="form-checkbox">
+                                    <div>
+                                        <i class="fas fa-eye text-primary mb-1"></i>
+                                        <span class="block text-sm font-medium">Visual</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 p-4 border rounded-lg cursor-pointer hover:border-primary transition">
+                                    <input type="radio" name="learning-style" value="auditory" class="form-checkbox">
+                                    <div>
+                                        <i class="fas fa-headphones text-primary mb-1"></i>
+                                        <span class="block text-sm font-medium">Auditory</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 p-4 border rounded-lg cursor-pointer hover:border-primary transition">
+                                    <input type="radio" name="learning-style" value="reading" class="form-checkbox" checked>
+                                    <div>
+                                        <i class="fas fa-book-open text-primary mb-1"></i>
+                                        <span class="block text-sm font-medium">Reading/Writing</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 p-4 border rounded-lg cursor-pointer hover:border-primary transition">
+                                    <input type="radio" name="learning-style" value="kinesthetic" class="form-checkbox">
+                                    <div>
+                                        <i class="fas fa-hand-paper text-primary mb-1"></i>
+                                        <span class="block text-sm font-medium">Kinesthetic</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- AI Model Selector -->
+                        <div class="form-group">
+                            <label class="form-label">AI Model</label>
+                            <select id="ai-model" class="form-select">
+                                <option value="deepseek/deepseek-v3.2:thinking">DeepSeek V3.2 (Recommended)</option>
+                                <option value="zai-org/glm-4.7:thinking">GLM 4.7 Thinking</option>
+                                <option value="Meta-Llama-3-1-405B-Instruct-FP8">Llama 3.1 Large</option>
+                                <option value="llama-4-maverick">Llama 4 Maverick</option>
+                                <option value="llama-3.3-70b">Llama 3.3 (70B)</option>
+                                <option value="minimax/minimax-m2.1">MiniMax M2.1</option>
+                                <option value="mistralai/mistral-large-3-675b-instruct-2512">Mistral Large 3</option>
+                                <option value="mistral-small-31">Mistral Small 3.1 (24B)</option>
+                                <option value="glm-4.5-air">GLM 4.5 Air</option>
+                                <option value="gpt-oss-120b">GPT OSS 120B</option>
+                                <option value="gpt-oss-20b">GPT OSS 20B</option>
+                                <option value="mimo-v2-flash-thinking">Xiaomi MIMO V2 Flash Thinking</option>
+                                <option value="moonshotai/kimi-k2-thinking">Kimi K2 Thinking</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic"></i>
+                                Generate Study Plan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Has Plan View -->
+        <div id="has-plan-view" class="hidden">
+            <!-- Plan Overview -->
+            <div class="grid lg:grid-cols-3 gap-6 mb-6">
+                <div class="card p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bullseye text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Target Score</p>
+                            <p class="text-2xl font-bold text-primary" id="plan-target-score">30</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-success text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Days Until Test</p>
+                            <p class="text-2xl font-bold text-success" id="days-until-test">--</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-tasks text-warning text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Plan Progress</p>
+                            <p class="text-2xl font-bold text-warning" id="plan-progress">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Left Column: Week Breakdown & Calendar -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Week-by-Week Breakdown -->
+                    <div class="card">
+                        <div class="card-header flex items-center justify-between">
+                            <h3 class="font-semibold">Weekly Schedule</h3>
+                            <div class="flex gap-2">
+                                <button id="prev-week-btn" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="current-week-label" class="text-sm font-medium">Week 1</span>
+                                <button id="next-week-btn" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0" id="week-accordion">
+                            <!-- Week days will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Calendar View -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="font-semibold">Calendar View</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="calendar-view" class="grid grid-cols-7 gap-1">
+                                <!-- Calendar will be populated here -->
+                            </div>
+                            <div class="flex flex-wrap gap-3 mt-4 text-sm">
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded"></span> English</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded"></span> Math</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-500 rounded"></span> Reading</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-500 rounded"></span> Science</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-pink-500 rounded"></span> Writing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Today's Tasks & Actions -->
+                <div class="space-y-6">
+                    <!-- Today's Tasks -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fas fa-calendar-day text-primary"></i>
+                                Today's Tasks
+                            </h3>
+                        </div>
+                        <div class="card-body p-0" id="todays-tasks">
+                            <div class="p-4 text-center text-gray-500">
+                                <i class="fas fa-check-circle text-4xl mb-2 text-gray-300"></i>
+                                <p>No tasks for today</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Indicators -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="font-semibold">Subject Progress</h3>
+                        </div>
+                        <div class="card-body space-y-4" id="subject-progress">
+                            <!-- Subject progress bars will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-body space-y-3">
+                            <button id="edit-plan-btn" class="btn btn-outline w-full">
+                                <i class="fas fa-edit"></i>
+                                Edit Plan
+                            </button>
+                            <button id="regenerate-plan-btn" class="btn btn-secondary w-full">
+                                <i class="fas fa-sync-alt"></i>
+                                Regenerate Plan
+                            </button>
+                            <button id="export-pdf-btn" class="btn btn-success w-full">
+                                <i class="fas fa-file-pdf"></i>
+                                Export as PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-view" class="hidden">
+            <div class="card p-12 text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading your study plan...</p>
+            </div>
+        </div>
+
+        <!-- Generating State -->
+        <div id="generating-view" class="hidden">
+            <div class="card p-12 text-center">
+                <div class="spinner spinner-lg mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold mb-2">Generating Your Study Plan</h3>
+                <p class="text-gray-600">Our AI is analyzing your goals and creating a personalized plan...</p>
+                <p class="text-sm text-gray-500 mt-2">This may take a minute.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading } = window.ACT;
+
+        let currentPlan = null;
+        let currentWeek = 0;
+
+        // Initialize page
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/study-plan';
+                return;
+            }
+
+            // Update UI with user data
+            window.ACT.updateUserUI(user);
+            
+            // Update email in dropdown
+            document.querySelectorAll('.user-email').forEach(el => {
+                el.textContent = user.email;
+            });
+
+            // Set minimum test date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('test-date').setAttribute('min', today);
+
+            // Load existing study plan
+            await loadStudyPlan();
+
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        async function loadStudyPlan() {
+            showView('loading');
+            
+            try {
+                // Get all study plans and use the most recent one
+                const response = await API.get('/api/study-plans');
+                
+                if (response.data && response.data.length > 0) {
+                    // Sort by created date descending and get the first (most recent)
+                    const plans = response.data.sort((a, b) => 
+                        new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+                    );
+                    currentPlan = plans[0];
+                    renderStudyPlan();
+                    showView('has-plan');
+                } else {
+                    showView('no-plan');
+                }
+            } catch (error) {
+                if (error.status === 404) {
+                    showView('no-plan');
+                } else {
+                    console.error('Failed to load study plan:', error);
+                    Toast.error('Failed to load study plan');
+                    showView('no-plan');
+                }
+            }
+        }
+
+        function showView(view) {
+            document.getElementById('no-plan-view').classList.add('hidden');
+            document.getElementById('has-plan-view').classList.add('hidden');
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('generating-view').classList.add('hidden');
+            
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+        }
+
+        function setupEventListeners() {
+            // Target score slider
+            document.getElementById('target-score').addEventListener('input', (e) => {
+                document.getElementById('target-score-value').textContent = e.target.value;
+            });
+
+            // Study hours slider
+            document.getElementById('study-hours').addEventListener('input', (e) => {
+                document.getElementById('study-hours-value').textContent = e.target.value;
+            });
+
+            // No score yet checkbox
+            document.getElementById('no-score-yet').addEventListener('change', (e) => {
+                const scoreInput = document.getElementById('current-score');
+                scoreInput.disabled = e.target.checked;
+                if (e.target.checked) {
+                    scoreInput.value = '';
+                }
+            });
+
+            // Form submission
+            document.getElementById('study-plan-form').addEventListener('submit', handleGeneratePlan);
+
+            // User menu toggle
+            document.getElementById('user-menu-btn').addEventListener('click', () => {
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                const userMenu = document.getElementById('user-menu');
+                if (!userMenu.contains(e.target)) {
+                    document.getElementById('user-dropdown').classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                await Auth.logout();
+            });
+
+            // Week navigation
+            document.getElementById('prev-week-btn').addEventListener('click', () => {
+                if (currentWeek > 0) {
+                    currentWeek--;
+                    renderWeekSchedule();
+                }
+            });
+
+            document.getElementById('next-week-btn').addEventListener('click', () => {
+                if (currentPlan && currentWeek < currentPlan.weeks.length - 1) {
+                    currentWeek++;
+                    renderWeekSchedule();
+                }
+            });
+
+            // Action buttons
+            document.getElementById('edit-plan-btn').addEventListener('click', () => {
+                showView('no-plan');
+                populateFormWithCurrentPlan();
+            });
+
+            document.getElementById('regenerate-plan-btn').addEventListener('click', () => {
+                Modal.confirm({
+                    title: 'Regenerate Study Plan',
+                    message: 'Are you sure you want to regenerate your study plan? This will replace your current plan.',
+                    confirmText: 'Regenerate',
+                    onConfirm: () => {
+                        showView('no-plan');
+                        populateFormWithCurrentPlan();
+                    }
+                });
+            });
+
+            document.getElementById('export-pdf-btn').addEventListener('click', exportAsPDF);
+
+            // Sidebar toggle
+            document.getElementById('sidebar-toggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+        }
+
+        async function handleGeneratePlan(e) {
+            e.preventDefault();
+            
+            const formData = {
+                currentScore: document.getElementById('no-score-yet').checked ? null : parseInt(document.getElementById('current-score').value) || null,
+                targetScore: parseInt(document.getElementById('target-score').value),
+                testDate: document.getElementById('test-date').value,
+                studyHoursPerDay: parseFloat(document.getElementById('study-hours').value),
+                daysAvailable: Array.from(document.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value),
+                weakSubjects: Array.from(document.getElementById('weak-subjects').selectedOptions).map(opt => opt.value),
+                strongSubjects: Array.from(document.getElementById('strong-subjects').selectedOptions).map(opt => opt.value),
+                learningStyle: document.querySelector('input[name="learning-style"]:checked')?.value || 'reading',
+                aiModel: document.getElementById('ai-model').value
+            };
+
+            // Validation
+            if (!formData.testDate) {
+                Toast.error('Please select a test date');
+                return;
+            }
+
+            if (formData.daysAvailable.length === 0) {
+                Toast.error('Please select at least one day for studying');
+                return;
+            }
+
+            showView('generating');
+
+            try {
+                const response = await API.post('/api/study-plans/generate', formData);
+                
+                if (response.data && response.data.plan) {
+                    currentPlan = response.data.plan;
+                    currentWeek = 0;
+                    renderStudyPlan();
+                    showView('has-plan');
+                    Toast.success('Study plan generated successfully!');
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (error) {
+                console.error('Failed to generate study plan:', error);
+                Toast.error(error.message || 'Failed to generate study plan');
+                showView('no-plan');
+            }
+        }
+
+        function renderStudyPlan() {
+            if (!currentPlan) return;
+
+            // Update overview cards
+            document.getElementById('plan-target-score').textContent = currentPlan.targetScore || '--';
+            
+            const testDate = new Date(currentPlan.testDate);
+            const today = new Date();
+            const daysUntil = Math.ceil((testDate - today) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-until-test').textContent = daysUntil > 0 ? daysUntil : 0;
+
+            // Calculate progress
+            const totalTasks = currentPlan.weeks?.reduce((sum, week) => 
+                sum + week.days?.reduce((daySum, day) => daySum + (day.tasks?.length || 0), 0) || 0, 0) || 0;
+            const completedTasks = currentPlan.weeks?.reduce((sum, week) => 
+                sum + week.days?.reduce((daySum, day) => 
+                    daySum + (day.tasks?.filter(t => t.completed).length || 0), 0) || 0, 0) || 0;
+            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            document.getElementById('plan-progress').textContent = `${progress}%`;
+
+            // Render week schedule
+            renderWeekSchedule();
+
+            // Render calendar
+            renderCalendar();
+
+            // Render today's tasks
+            renderTodaysTasks();
+
+            // Render subject progress
+            renderSubjectProgress();
+        }
+
+        function renderWeekSchedule() {
+            if (!currentPlan || !currentPlan.weeks) return;
+
+            const week = currentPlan.weeks[currentWeek];
+            if (!week) return;
+
+            document.getElementById('current-week-label').textContent = `Week ${currentWeek + 1} of ${currentPlan.weeks.length}`;
+
+            const container = document.getElementById('week-accordion');
+            container.innerHTML = '';
+
+            const days = week.days || [];
+            days.forEach((day, index) => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'border-b last:border-b-0';
+                dayEl.innerHTML = `
+                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-3">
+                            <span class="font-medium">${day.dayName || `Day ${index + 1}`}</span>
+                            <span class="text-sm text-gray-500">${day.date || ''}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-gray-500">${day.tasks?.length || 0} tasks</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </div>
+                    </button>
+                    <div class="hidden px-4 pb-4">
+                        ${(day.tasks || []).map(task => `
+                            <div class="flex items-center gap-3 py-2 border-b last:border-b-0">
+                                <input type="checkbox" class="form-checkbox" 
+                                    ${task.completed ? 'checked' : ''} 
+                                    onchange="toggleTask('${task.id}', this.checked)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium ${task.completed ? 'line-through text-gray-400' : ''}">${task.activity}</p>
+                                    <p class="text-xs text-gray-500">${task.duration || ''} - ${task.subject}</p>
+                                </div>
+                                <span class="badge badge-${getSubjectBadgeClass(task.subject)}">${task.subject}</span>
+                            </div>
+                        `).join('') || '<p class="text-gray-500 text-sm">No tasks scheduled</p>'}
+                    </div>
+                `;
+                container.appendChild(dayEl);
+            });
+        }
+
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        function getSubjectBadgeClass(subject) {
+            const classes = {
+                english: 'primary',
+                math: 'success',
+                reading: 'warning',
+                science: 'secondary',
+                writing: 'danger'
+            };
+            return classes[subject?.toLowerCase()] || 'primary';
+        }
+
+        function getSubjectColor(subject) {
+            const colors = {
+                english: 'bg-blue-500',
+                math: 'bg-green-500',
+                reading: 'bg-yellow-500',
+                science: 'bg-purple-500',
+                writing: 'bg-pink-500'
+            };
+            return colors[subject?.toLowerCase()] || 'bg-gray-500';
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('calendar-view');
+            container.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                container.innerHTML += `<div class="text-center text-xs font-medium text-gray-500 py-2">${day}</div>`;
+            });
+
+            if (!currentPlan || !currentPlan.weeks) return;
+
+            // Get all days from the plan
+            const allDays = [];
+            currentPlan.weeks.forEach(week => {
+                week.days?.forEach(day => {
+                    if (day.date) {
+                        allDays.push(day);
+                    }
+                });
+            });
+
+            if (allDays.length === 0) return;
+
+            // Get start and end dates
+            const startDate = new Date(allDays[0].date);
+            const endDate = new Date(allDays[allDays.length - 1].date);
+
+            // Pad to start of week
+            const firstDay = new Date(startDate);
+            firstDay.setDate(firstDay.getDate() - firstDay.getDay());
+
+            // Create calendar grid
+            let current = new Date(firstDay);
+            while (current <= endDate || current.getDay() !== 0) {
+                const dateStr = current.toISOString().split('T')[0];
+                const dayData = allDays.find(d => d.date === dateStr);
+                
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+                const subjects = dayData?.tasks?.map(t => t.subject?.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i) || [];
+
+                container.innerHTML += `
+                    <div class="p-1 min-h-[60px] border rounded ${isToday ? 'bg-primary/10 border-primary' : 'bg-white'}">
+                        <div class="text-xs ${isToday ? 'font-bold text-primary' : 'text-gray-500'}">${current.getDate()}</div>
+                        <div class="flex flex-wrap gap-0.5 mt-1">
+                            ${subjects.slice(0, 3).map(s => `<span class="w-2 h-2 ${getSubjectColor(s)} rounded-full"></span>`).join('')}
+                        </div>
+                    </div>
+                `;
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+
+        function renderTodaysTasks() {
+            const container = document.getElementById('todays-tasks');
+            
+            if (!currentPlan || !currentPlan.weeks) {
+                container.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-check-circle text-4xl mb-2 text-gray-300"></i>
+                        <p>No tasks for today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            let todayTasks = [];
+
+            currentPlan.weeks.forEach(week => {
+                week.days?.forEach(day => {
+                    if (day.date === todayStr) {
+                        todayTasks = day.tasks || [];
+                    }
+                });
+            });
+
+            if (todayTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <i class="fas fa-check-circle text-4xl mb-2 text-gray-300"></i>
+                        <p>No tasks for today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = todayTasks.map(task => `
+                <div class="flex items-center px-4 py-3 border-b last:border-b-0 hover:bg-gray-50">
+                    <input type="checkbox" class="form-checkbox mr-3" 
+                        ${task.completed ? 'checked' : ''} 
+                        onchange="toggleTask('${task.id}', this.checked)">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium ${task.completed ? 'line-through text-gray-400' : ''}">${task.activity}</p>
+                        <p class="text-xs text-gray-500">${task.duration || 'Flexible'}</p>
+                    </div>
+                    <span class="badge badge-${getSubjectBadgeClass(task.subject)}">${task.subject}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderSubjectProgress() {
+            const container = document.getElementById('subject-progress');
+            
+            if (!currentPlan || !currentPlan.subjectProgress) {
+                container.innerHTML = `
+                    <p class="text-gray-500 text-sm text-center">No progress data available</p>
+                `;
+                return;
+            }
+
+            const subjects = ['English', 'Math', 'Reading', 'Science', 'Writing'];
+            container.innerHTML = subjects.map(subject => {
+                const progress = currentPlan.subjectProgress?.[subject.toLowerCase()] || 0;
+                return `
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium">${subject}</span>
+                            <span class="text-sm text-gray-500">${progress}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${progress}%; background: ${getSubjectColorHex(subject)}"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getSubjectColorHex(subject) {
+            const colors = {
+                english: '#3b82f6',
+                math: '#10b981',
+                reading: '#f59e0b',
+                science: '#7c3aed',
+                writing: '#ec4899'
+            };
+            return colors[subject.toLowerCase()] || '#6b7280';
+        }
+
+        async function toggleTask(taskId, completed) {
+            try {
+                await API.put(`/api/study-plans/tasks/${taskId}`, { completed });
+                
+                // Update local state
+                if (currentPlan && currentPlan.weeks) {
+                    currentPlan.weeks.forEach(week => {
+                        week.days?.forEach(day => {
+                            const task = day.tasks?.find(t => t.id === taskId);
+                            if (task) {
+                                task.completed = completed;
+                            }
+                        });
+                    });
+                }
+
+                // Re-render affected sections
+                renderStudyPlan();
+                
+                if (completed) {
+                    Toast.success('Task completed! 🎉');
+                }
+            } catch (error) {
+                console.error('Failed to update task:', error);
+                Toast.error('Failed to update task');
+            }
+        }
+
+        function populateFormWithCurrentPlan() {
+            if (!currentPlan) return;
+
+            if (currentPlan.currentScore) {
+                document.getElementById('current-score').value = currentPlan.currentScore;
+            }
+            if (currentPlan.targetScore) {
+                document.getElementById('target-score').value = currentPlan.targetScore;
+                document.getElementById('target-score-value').textContent = currentPlan.targetScore;
+            }
+            if (currentPlan.testDate) {
+                document.getElementById('test-date').value = currentPlan.testDate;
+            }
+            if (currentPlan.studyHoursPerDay) {
+                document.getElementById('study-hours').value = currentPlan.studyHoursPerDay;
+                document.getElementById('study-hours-value').textContent = currentPlan.studyHoursPerDay;
+            }
+        }
+
+        async function exportAsPDF() {
+            Toast.info('Preparing PDF export...');
+            
+            try {
+                // For now, trigger browser print dialog
+                window.print();
+            } catch (error) {
+                console.error('Failed to export PDF:', error);
+                Toast.error('Failed to export PDF');
+            }
+        }
+
+        // Make functions globally available
+        window.toggleAccordion = toggleAccordion;
+        window.toggleTask = toggleTask;
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lessons - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-home"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/lessons" class="sidebar-link active"><i class="fas fa-book"></i> Lessons</a>
+            <a href="/quizzes" class="sidebar-link"><i class="fas fa-question-circle"></i> Quizzes</a>
+            <a href="/tests" class="sidebar-link"><i class="fas fa-file-alt"></i> Practice Tests</a>
+            <a href="/chat" class="sidebar-link"><i class="fas fa-comments"></i> AI Tutor</a>
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            <a href="/study-plan" class="sidebar-link"><i class="fas fa-calendar-alt"></i> Study Plan</a>
+            <a href="/essays" class="sidebar-link"><i class="fas fa-pen-fancy"></i> Essay Practice</a>
+            <a href="/flashcards" class="sidebar-link"><i class="fas fa-clone"></i> Flashcards</a>
+            <a href="/progress" class="sidebar-link"><i class="fas fa-chart-line"></i> Progress</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Lessons</h1>
+                <p class="text-gray-600">Generate AI-powered lessons on any ACT topic</p>
+            </div>
+            <button id="new-lesson-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Lesson
+            </button>
+        </div>
+
+        <!-- Generate Lesson Modal Content (hidden by default) -->
+        <div id="generate-form-container" class="hidden">
+            <form id="generate-form" class="space-y-4">
+                <div class="form-group">
+                    <label class="form-label">Subject *</label>
+                    <select name="subject" id="subject-select" class="form-select" required>
+                        <option value="">Select a subject</option>
+                        <option value="English">English</option>
+                        <option value="Math">Math</option>
+                        <option value="Reading">Reading</option>
+                        <option value="Science">Science</option>
+                        <option value="Writing">Writing</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Topic</label>
+                    <select name="topic" id="topic-select" class="form-select">
+                        <option value="">Select a topic</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Or enter your own topic</label>
+                    <input type="text" name="customTopic" class="form-input" placeholder="E.g., Quadratic equations word problems">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Difficulty</label>
+                        <select name="difficulty" class="form-select">
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate" selected>Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Length</label>
+                        <select name="length" class="form-select">
+                            <option value="Short">Short (5 min)</option>
+                            <option value="Medium" selected>Medium (15 min)</option>
+                            <option value="Long">Long (30 min)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Focus Areas</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" name="focusAreas" value="Concepts" class="form-checkbox" checked>
+                            <span class="text-sm">Concepts</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" name="focusAreas" value="Examples" class="form-checkbox" checked>
+                            <span class="text-sm">Examples</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" name="focusAreas" value="Practice Problems" class="form-checkbox" checked>
+                            <span class="text-sm">Practice Problems</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" name="focusAreas" value="Test Strategies" class="form-checkbox">
+                            <span class="text-sm">Test Strategies</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">AI Model</label>
+                    <select name="model" id="model-select" class="form-select">
+                        <option value="deepseek-v3">DeepSeek V3.2 (Recommended)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex-1 min-w-[200px]">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="search-input" class="form-input pl-10" placeholder="Search lessons...">
+                        </div>
+                    </div>
+                    
+                    <select id="filter-subject" class="form-select w-auto">
+                        <option value="">All Subjects</option>
+                        <option value="English">English</option>
+                        <option value="Math">Math</option>
+                        <option value="Reading">Reading</option>
+                        <option value="Science">Science</option>
+                        <option value="Writing">Writing</option>
+                    </select>
+                    
+                    <select id="filter-difficulty" class="form-select w-auto">
+                        <option value="">All Difficulties</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                    
+                    <select id="sort-by" class="form-select w-auto">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title">Title A-Z</option>
+                    </select>
+                    
+                    <div class="flex items-center space-x-2">
+                        <button id="view-grid" class="p-2 rounded bg-primary text-white">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button id="view-list" class="p-2 rounded bg-gray-200 text-gray-600 hover:bg-gray-300">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Grid -->
+        <div id="lessons-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Lessons will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-book text-4xl text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">No lessons yet</h3>
+            <p class="text-gray-600 mb-4">Generate your first AI-powered lesson</p>
+            <button class="btn btn-primary" onclick="document.getElementById('new-lesson-btn').click()">
+                <i class="fas fa-plus mr-2"></i> Create Lesson
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-16">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading lessons...</p>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="hidden flex items-center justify-center space-x-2 mt-8">
+            <button id="prev-page" class="btn btn-outline" disabled>
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span id="page-info" class="px-4 text-sm text-gray-600">Page 1 of 1</span>
+            <button id="next-page" class="btn btn-outline" disabled>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading, Format, debounce } = window.ACT;
+
+        let currentPage = 1;
+        let totalPages = 1;
+        let topics = {};
+        let models = [];
+        let viewMode = 'grid';
+
+        // Initialize
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/lessons';
+                return;
+            }
+
+            // Load topics and models
+            await Promise.all([loadTopics(), loadModels()]);
+            
+            // Load lessons
+            await loadLessons();
+        }
+
+        async function loadTopics() {
+            try {
+                const response = await API.get('/api/lessons/topics');
+                topics = response.data.topics;
+            } catch (error) {
+                console.error('Failed to load topics:', error);
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const response = await API.get('/api/lessons/models');
+                models = response.data.models;
+                
+                const select = document.getElementById('model-select');
+                select.innerHTML = models.map(m => 
+                    `<option value="${m.key}">${m.name}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+
+        async function loadLessons() {
+            const container = document.getElementById('lessons-container');
+            const emptyState = document.getElementById('empty-state');
+            const loadingState = document.getElementById('loading-state');
+            const pagination = document.getElementById('pagination');
+
+            loadingState.classList.remove('hidden');
+            container.innerHTML = '';
+            emptyState.classList.add('hidden');
+            pagination.classList.add('hidden');
+
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: 12,
+                    subject: document.getElementById('filter-subject').value,
+                    difficulty: document.getElementById('filter-difficulty').value,
+                    sort: document.getElementById('sort-by').value,
+                    search: document.getElementById('search-input').value
+                });
+
+                const response = await API.get(`/api/lessons?${params}`);
+                const { items, total, totalPages: pages } = response.data;
+
+                loadingState.classList.add('hidden');
+                totalPages = pages;
+
+                if (items.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                container.innerHTML = items.map(lesson => renderLessonCard(lesson)).join('');
+                
+                // Update pagination
+                if (totalPages > 1) {
+                    pagination.classList.remove('hidden');
+                    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+                    document.getElementById('prev-page').disabled = currentPage === 1;
+                    document.getElementById('next-page').disabled = currentPage === totalPages;
+                }
+
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                Toast.error('Failed to load lessons');
+            }
+        }
+
+        function renderLessonCard(lesson) {
+            const subjectColors = {
+                'English': 'bg-blue-100 text-blue-700',
+                'Math': 'bg-green-100 text-green-700',
+                'Reading': 'bg-yellow-100 text-yellow-700',
+                'Science': 'bg-purple-100 text-purple-700',
+                'Writing': 'bg-pink-100 text-pink-700'
+            };
+
+            return `
+                <div class="card hover:shadow-lg transition cursor-pointer" onclick="viewLesson('${lesson.id}')">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="badge ${subjectColors[lesson.subject] || 'bg-gray-100'}">${lesson.subject}</span>
+                            <div class="flex items-center space-x-2">
+                                ${lesson.favorite ? '<i class="fas fa-star text-warning"></i>' : ''}
+                                ${lesson.completed ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                            </div>
+                        </div>
+                        <h3 class="font-semibold mb-2 line-clamp-2">${lesson.title}</h3>
+                        <p class="text-sm text-gray-500 mb-3">${lesson.topic}</p>
+                        <div class="flex items-center justify-between text-xs text-gray-400">
+                            <span><i class="fas fa-signal mr-1"></i>${lesson.difficulty}</span>
+                            <span><i class="fas fa-clock mr-1"></i>${lesson.length}</span>
+                            <span>${Format.relative(lesson.createdAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewLesson(id) {
+            window.location.href = `/lesson/${id}`;
+        }
+
+        // Subject change - update topics
+        document.getElementById('subject-select').addEventListener('change', function() {
+            const topicSelect = document.getElementById('topic-select');
+            const subject = this.value.toLowerCase();
+            
+            topicSelect.innerHTML = '<option value="">Select a topic</option>';
+            
+            if (topics[subject]) {
+                topics[subject].forEach(topic => {
+                    topicSelect.innerHTML += `<option value="${topic}">${topic}</option>`;
+                });
+            }
+        });
+
+        // New lesson button
+        document.getElementById('new-lesson-btn').addEventListener('click', () => {
+            const formContainer = document.getElementById('generate-form-container');
+            const formClone = formContainer.cloneNode(true);
+            formClone.classList.remove('hidden');
+            formClone.id = 'modal-form-container';
+
+            Modal.show({
+                title: 'Generate New Lesson',
+                content: formClone,
+                confirmText: 'Generate Lesson',
+                onConfirm: async () => {
+                    const form = document.querySelector('#modal-form-container form');
+                    const formData = new FormData(form);
+                    
+                    const data = {
+                        subject: formData.get('subject'),
+                        topic: formData.get('topic'),
+                        customTopic: formData.get('customTopic'),
+                        difficulty: formData.get('difficulty'),
+                        length: formData.get('length'),
+                        focusAreas: formData.getAll('focusAreas'),
+                        model: formData.get('model')
+                    };
+
+                    if (!data.subject) {
+                        Toast.error('Please select a subject');
+                        return false;
+                    }
+
+                    if (!data.topic && !data.customTopic) {
+                        Toast.error('Please select or enter a topic');
+                        return false;
+                    }
+
+                    // Show loading
+                    const confirmBtn = document.querySelector('.modal-confirm');
+                    Loading.button(confirmBtn, true, 'Generating...');
+
+                    try {
+                        const response = await API.post('/api/lessons/generate', data);
+                        Toast.success('Lesson generated successfully!');
+                        window.location.href = `/lesson/${response.data.lesson.id}`;
+                    } catch (error) {
+                        Toast.error(error.message || 'Failed to generate lesson');
+                        Loading.button(confirmBtn, false);
+                        return false;
+                    }
+                }
+            });
+
+            // Re-attach subject change handler for modal
+            const modalSubject = document.querySelector('#modal-form-container #subject-select');
+            const modalTopic = document.querySelector('#modal-form-container #topic-select');
+            
+            modalSubject.addEventListener('change', function() {
+                const subject = this.value.toLowerCase();
+                modalTopic.innerHTML = '<option value="">Select a topic</option>';
+                
+                if (topics[subject]) {
+                    topics[subject].forEach(topic => {
+                        modalTopic.innerHTML += `<option value="${topic}">${topic}</option>`;
+                    });
+                }
+            });
+
+            // Populate models
+            const modalModel = document.querySelector('#modal-form-container #model-select');
+            modalModel.innerHTML = models.map(m => 
+                `<option value="${m.key}">${m.name}</option>`
+            ).join('');
+        });
+
+        // Filters
+        document.getElementById('filter-subject').addEventListener('change', () => { currentPage = 1; loadLessons(); });
+        document.getElementById('filter-difficulty').addEventListener('change', () => { currentPage = 1; loadLessons(); });
+        document.getElementById('sort-by').addEventListener('change', () => { currentPage = 1; loadLessons(); });
+        document.getElementById('search-input').addEventListener('input', debounce(() => { currentPage = 1; loadLessons(); }, 300));
+
+        // Pagination
+        document.getElementById('prev-page').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadLessons(); } });
+        document.getElementById('next-page').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadLessons(); } });
+
+        // View toggle
+        document.getElementById('view-grid').addEventListener('click', function() {
+            viewMode = 'grid';
+            this.classList.add('bg-primary', 'text-white');
+            this.classList.remove('bg-gray-200', 'text-gray-600');
+            document.getElementById('view-list').classList.remove('bg-primary', 'text-white');
+            document.getElementById('view-list').classList.add('bg-gray-200', 'text-gray-600');
+            document.getElementById('lessons-container').className = 'grid md:grid-cols-2 lg:grid-cols-3 gap-6';
+        });
+
+        document.getElementById('view-list').addEventListener('click', function() {
+            viewMode = 'list';
+            this.classList.add('bg-primary', 'text-white');
+            this.classList.remove('bg-gray-200', 'text-gray-600');
+            document.getElementById('view-grid').classList.remove('bg-primary', 'text-white');
+            document.getElementById('view-grid').classList.add('bg-gray-200', 'text-gray-600');
+            document.getElementById('lessons-container').className = 'space-y-4';
+        });
+
+        init();
+    </script>
+</body>
+</html>
