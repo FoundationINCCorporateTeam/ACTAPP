@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essay Practice - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="p-2 text-gray-600 hover:text-primary lg:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- XP and Level -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="text-sm font-medium">Level <span class="user-level">1</span></span>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-sm"><span class="user-xp">0</span> XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="hidden sm:flex items-center space-x-1 bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-fire"></i>
+                    <span class="text-sm font-medium"><span class="user-streak">0</span> day streak</span>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 p-1.5 rounded-full hover:bg-gray-100" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white user-avatar">
+                            <span class="text-sm font-medium">?</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border hidden" id="user-dropdown">
+                        <div class="px-4 py-3 border-b">
+                            <div class="font-medium user-name">User</div>
+                            <div class="text-sm text-gray-500 user-email">user@example.com</div>
+                        </div>
+                        <div class="py-1">
+                            <a href="/profile" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i> Profile
+                            </a>
+                            <a href="/settings" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i> Settings
+                            </a>
+                            <hr class="my-1">
+                            <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-danger hover:bg-gray-50">
+                                <i class="fas fa-sign-out-alt w-5"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar pt-4">
+        <nav class="px-3">
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/lessons" class="sidebar-link">
+                <i class="fas fa-book"></i> Lessons
+            </a>
+            <a href="/quizzes" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Quizzes
+            </a>
+            <a href="/tests" class="sidebar-link">
+                <i class="fas fa-file-alt"></i> Practice Tests
+            </a>
+            <a href="/chat" class="sidebar-link">
+                <i class="fas fa-comments"></i> AI Tutor
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Study Tools</div>
+            
+            <a href="/study-plan" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i> Study Plan
+            </a>
+            <a href="/essays" class="sidebar-link active">
+                <i class="fas fa-pen-fancy"></i> Essay Practice
+            </a>
+            <a href="/flashcards" class="sidebar-link">
+                <i class="fas fa-clone"></i> Flashcards
+            </a>
+            <a href="/progress" class="sidebar-link">
+                <i class="fas fa-chart-line"></i> Progress
+            </a>
+            
+            <div class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Account</div>
+            
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="/help" class="sidebar-link">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content pt-20">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Essay Practice</h1>
+            <p class="text-gray-600 mt-1">Practice for the ACT Writing section with AI-powered prompts and grading.</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b mb-6">
+            <button class="tab-btn active px-4 py-2 font-medium text-primary border-b-2 border-primary" data-tab="prompts">
+                <i class="fas fa-list-alt mr-2"></i>Essay Prompts
+            </button>
+            <button class="tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700" data-tab="write">
+                <i class="fas fa-edit mr-2"></i>Write Essay
+            </button>
+            <button class="tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700" data-tab="graded">
+                <i class="fas fa-check-circle mr-2"></i>Graded Essays
+            </button>
+        </div>
+
+        <!-- Tab Content: Essay Prompts Library -->
+        <div id="prompts-tab" class="tab-content">
+            <!-- Filters and Actions -->
+            <div class="flex flex-wrap gap-4 mb-6 items-center justify-between">
+                <div class="flex gap-4">
+                    <select id="category-filter" class="form-select w-auto">
+                        <option value="">All Categories</option>
+                        <option value="education">Education</option>
+                        <option value="technology">Technology</option>
+                        <option value="society">Society</option>
+                        <option value="environment">Environment</option>
+                        <option value="ethics">Ethics</option>
+                    </select>
+                    <select id="difficulty-filter" class="form-select w-auto">
+                        <option value="">All Difficulties</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <button id="generate-prompt-btn" class="btn btn-primary">
+                    <i class="fas fa-magic"></i>
+                    Generate New Prompt
+                </button>
+            </div>
+
+            <!-- Prompts Grid -->
+            <div id="prompts-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Loading skeleton -->
+                <div class="card p-4">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text w-3/4"></div>
+                    <div class="skeleton skeleton-text w-1/2 mt-4"></div>
+                </div>
+                <div class="card p-4">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text w-3/4"></div>
+                    <div class="skeleton skeleton-text w-1/2 mt-4"></div>
+                </div>
+                <div class="card p-4">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text w-3/4"></div>
+                    <div class="skeleton skeleton-text w-1/2 mt-4"></div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="prompts-empty" class="hidden card p-12 text-center">
+                <i class="fas fa-file-alt text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">No Prompts Found</h3>
+                <p class="text-gray-500 mb-4">Generate a new prompt to get started with essay practice.</p>
+                <button class="btn btn-primary" onclick="showGenerateModal()">
+                    <i class="fas fa-magic"></i> Generate Prompt
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content: Write Essay -->
+        <div id="write-tab" class="tab-content hidden">
+            <!-- No prompt selected state -->
+            <div id="no-prompt-selected" class="card p-12 text-center">
+                <i class="fas fa-pen-fancy text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">No Prompt Selected</h3>
+                <p class="text-gray-500 mb-4">Select a prompt from the library to start writing.</p>
+                <button class="btn btn-primary" onclick="switchTab('prompts')">
+                    <i class="fas fa-list-alt"></i> Browse Prompts
+                </button>
+            </div>
+
+            <!-- Essay Writing Area -->
+            <div id="essay-writing-area" class="hidden">
+                <!-- Prompt Display -->
+                <div class="card mb-6">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-semibold">Prompt</h3>
+                        <button id="close-prompt-btn" class="btn btn-ghost btn-sm">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p id="current-prompt-text" class="text-gray-700 mb-4"></p>
+                        <div id="perspectives-container" class="space-y-3">
+                            <!-- Perspectives will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Writing Tools -->
+                <div class="card mb-6">
+                    <div class="card-header flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <!-- Timer -->
+                            <div class="flex items-center gap-2">
+                                <button id="timer-toggle" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span id="timer-display" class="font-mono text-lg font-semibold">40:00</span>
+                                <button id="timer-reset" class="btn btn-ghost btn-sm" title="Reset Timer">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                            <div class="h-6 w-px bg-gray-300"></div>
+                            <!-- Font Size -->
+                            <div class="flex items-center gap-1">
+                                <button id="font-decrease" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span id="font-size-display" class="text-sm w-8 text-center">16</span>
+                                <button id="font-increase" class="btn btn-ghost btn-sm">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="h-6 w-px bg-gray-300"></div>
+                            <!-- Dark Mode Toggle -->
+                            <button id="dark-mode-toggle" class="btn btn-ghost btn-sm" title="Toggle Dark Mode">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <!-- Auto-save indicator -->
+                            <span id="autosave-indicator" class="text-sm text-gray-500">
+                                <i class="fas fa-cloud"></i> Saved
+                            </span>
+                            <!-- Stats -->
+                            <div class="text-sm text-gray-600">
+                                <span id="word-count">0</span> words |
+                                <span id="paragraph-count">0</span> paragraphs
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <textarea 
+                            id="essay-textarea" 
+                            class="w-full min-h-[400px] p-6 border-0 resize-none focus:outline-none"
+                            placeholder="Start writing your essay here...
+
+Remember to:
+• State your thesis clearly in the introduction
+• Address all three perspectives
+• Use specific examples to support your argument
+• Organize your essay with clear paragraphs
+• Conclude by restating your position"
+                        ></textarea>
+                    </div>
+                    <div class="card-footer flex items-center justify-between">
+                        <div class="text-sm">
+                            <span class="text-gray-500">Target:</span>
+                            <span class="font-medium">500-800 words</span>
+                            <span id="word-target-indicator" class="ml-2"></span>
+                        </div>
+                        <button id="submit-essay-btn" class="btn btn-success">
+                            <i class="fas fa-check"></i>
+                            Submit for Grading
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Graded Essays -->
+        <div id="graded-tab" class="tab-content hidden">
+            <!-- Graded Essays List -->
+            <div id="graded-essays-list" class="space-y-4">
+                <!-- Loading skeleton -->
+                <div class="card p-4">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text w-3/4"></div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="graded-empty" class="hidden card p-12 text-center">
+                <i class="fas fa-clipboard-check text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">No Graded Essays Yet</h3>
+                <p class="text-gray-500 mb-4">Submit an essay for grading to see your results here.</p>
+                <button class="btn btn-primary" onclick="switchTab('prompts')">
+                    <i class="fas fa-pen-fancy"></i> Start Writing
+                </button>
+            </div>
+
+            <!-- Essay Detail View -->
+            <div id="essay-detail-view" class="hidden">
+                <button id="back-to-list-btn" class="btn btn-ghost mb-4">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </button>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Essay Content -->
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="font-semibold" id="detail-prompt-title">Essay</h3>
+                                <p class="text-sm text-gray-500" id="detail-date"></p>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-sm font-medium text-gray-500 mb-2">Prompt:</p>
+                                    <p id="detail-prompt-text" class="text-gray-700"></p>
+                                </div>
+                                <div class="prose max-w-none" id="detail-essay-content"></div>
+                            </div>
+                            <div class="card-footer flex justify-end">
+                                <button id="download-pdf-btn" class="btn btn-outline">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Download as PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scores and Feedback -->
+                    <div class="space-y-6">
+                        <!-- Overall Score -->
+                        <div class="card p-4 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Overall Score</p>
+                            <div class="text-5xl font-bold text-primary" id="detail-overall-score">--</div>
+                            <p class="text-sm text-gray-500">out of 12</p>
+                        </div>
+
+                        <!-- Individual Scores -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="font-semibold">Score Breakdown</h4>
+                            </div>
+                            <div class="card-body space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium">Ideas & Analysis</span>
+                                        <span id="score-ideas" class="text-sm font-semibold">--/6</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div id="bar-ideas" class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium">Development & Support</span>
+                                        <span id="score-development" class="text-sm font-semibold">--/6</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div id="bar-development" class="progress-bar progress-bar-success" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium">Organization</span>
+                                        <span id="score-organization" class="text-sm font-semibold">--/6</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div id="bar-organization" class="progress-bar progress-bar-warning" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium">Language Use</span>
+                                        <span id="score-language" class="text-sm font-semibold">--/6</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div id="bar-language" class="progress-bar" style="width: 0%; background: #7c3aed"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strengths -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="font-semibold flex items-center gap-2">
+                                    <i class="fas fa-thumbs-up text-success"></i> Strengths
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <ul id="detail-strengths" class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Areas for Improvement -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="font-semibold flex items-center gap-2">
+                                    <i class="fas fa-lightbulb text-warning"></i> Areas for Improvement
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <ul id="detail-weaknesses" class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Feedback -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="font-semibold">Detailed Feedback</h4>
+                            </div>
+                            <div class="card-body">
+                                <p id="detail-feedback" class="text-sm text-gray-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-view" class="hidden">
+            <div class="card p-12 text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Grading State -->
+        <div id="grading-view" class="hidden">
+            <div class="card p-12 text-center">
+                <div class="spinner spinner-lg mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold mb-2">Grading Your Essay</h3>
+                <p class="text-gray-600">Our AI is analyzing your writing...</p>
+                <p class="text-sm text-gray-500 mt-2">This may take a moment.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generate Prompt Modal -->
+    <div id="generate-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="font-semibold">Generate New Prompt</h3>
+                <button id="close-generate-modal" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Category (Optional)</label>
+                    <select id="generate-category" class="form-select">
+                        <option value="">Random</option>
+                        <option value="education">Education</option>
+                        <option value="technology">Technology</option>
+                        <option value="society">Society</option>
+                        <option value="environment">Environment</option>
+                        <option value="ethics">Ethics</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select id="generate-difficulty" class="form-select">
+                        <option value="intermediate">Intermediate</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">AI Model</label>
+                    <select id="generate-ai-model" class="form-select">
+                        <option value="deepseek/deepseek-v3.2:thinking">DeepSeek V3.2 (Recommended)</option>
+                        <option value="zai-org/glm-4.7:thinking">GLM 4.7 Thinking</option>
+                        <option value="Meta-Llama-3-1-405B-Instruct-FP8">Llama 3.1 Large</option>
+                        <option value="llama-4-maverick">Llama 4 Maverick</option>
+                        <option value="llama-3.3-70b">Llama 3.3 (70B)</option>
+                        <option value="minimax/minimax-m2.1">MiniMax M2.1</option>
+                        <option value="mistralai/mistral-large-3-675b-instruct-2512">Mistral Large 3</option>
+                        <option value="mistral-small-31">Mistral Small 3.1 (24B)</option>
+                        <option value="glm-4.5-air">GLM 4.5 Air</option>
+                        <option value="gpt-oss-120b">GPT OSS 120B</option>
+                        <option value="gpt-oss-20b">GPT OSS 20B</option>
+                        <option value="mimo-v2-flash-thinking">Xiaomi MIMO V2 Flash Thinking</option>
+                        <option value="moonshotai/kimi-k2-thinking">Kimi K2 Thinking</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-generate" class="btn btn-outline">Cancel</button>
+                <button id="confirm-generate" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading, Format } = window.ACT;
+
+        // State
+        let prompts = [];
+        let gradedEssays = [];
+        let currentPrompt = null;
+        let currentDraft = null;
+        let currentEssayDetail = null;
+        let timerInterval = null;
+        let timerSeconds = 40 * 60; // 40 minutes
+        let timerRunning = false;
+        let autoSaveInterval = null;
+        let fontSize = 16;
+        let darkMode = false;
+
+        // Initialize page
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/essays';
+                return;
+            }
+
+            // Update UI with user data
+            window.ACT.updateUserUI(user);
+            
+            // Update email in dropdown
+            document.querySelectorAll('.user-email').forEach(el => {
+                el.textContent = user.email;
+            });
+
+            // Load initial data
+            await Promise.all([
+                loadPrompts(),
+                loadGradedEssays()
+            ]);
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Start auto-save interval
+            startAutoSave();
+        }
+
+        async function loadPrompts() {
+            try {
+                const response = await API.get('/api/essays/prompts');
+                prompts = response.data || [];
+                renderPrompts();
+            } catch (error) {
+                console.error('Failed to load prompts:', error);
+                prompts = [];
+                renderPrompts();
+            }
+        }
+
+        async function loadGradedEssays() {
+            try {
+                const response = await API.get('/api/essays');
+                gradedEssays = response.data || [];
+                renderGradedEssays();
+            } catch (error) {
+                console.error('Failed to load graded essays:', error);
+                gradedEssays = [];
+                renderGradedEssays();
+            }
+        }
+
+        function renderPrompts() {
+            const grid = document.getElementById('prompts-grid');
+            const empty = document.getElementById('prompts-empty');
+
+            const categoryFilter = document.getElementById('category-filter').value;
+            const difficultyFilter = document.getElementById('difficulty-filter').value;
+
+            let filtered = prompts;
+            if (categoryFilter) {
+                filtered = filtered.filter(p => p.category?.toLowerCase() === categoryFilter);
+            }
+            if (difficultyFilter) {
+                filtered = filtered.filter(p => p.difficulty?.toLowerCase() === difficultyFilter);
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.innerHTML = filtered.map(prompt => `
+                <div class="card hover:shadow-lg transition cursor-pointer" onclick="selectPrompt('${prompt.id}')">
+                    <div class="card-body">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-lg">${escapeHtml(prompt.title || 'Untitled Prompt')}</h3>
+                            <span class="badge badge-${getDifficultyBadge(prompt.difficulty)}">${prompt.difficulty || 'Intermediate'}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">${escapeHtml(truncate(prompt.text, 150))}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="badge badge-primary">${prompt.category || 'General'}</span>
+                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); selectPrompt('${prompt.id}')">
+                                <i class="fas fa-pen"></i> Start Writing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderGradedEssays() {
+            const list = document.getElementById('graded-essays-list');
+            const empty = document.getElementById('graded-empty');
+
+            if (gradedEssays.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            list.innerHTML = gradedEssays.map(essay => `
+                <div class="card hover:shadow-lg transition cursor-pointer" onclick="viewEssayDetail('${essay.id}')">
+                    <div class="card-body flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold">${escapeHtml(truncate(essay.promptText || essay.prompt?.text || 'Essay', 80))}</h3>
+                            <p class="text-sm text-gray-500">${formatDate(essay.gradedAt || essay.createdAt)}</p>
+                        </div>
+                        <div class="text-center px-4">
+                            <div class="text-2xl font-bold text-primary">${essay.overallScore || '--'}</div>
+                            <div class="text-xs text-gray-500">out of 12</div>
+                        </div>
+                        <button class="btn btn-ghost">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPrompt(promptId) {
+            currentPrompt = prompts.find(p => p.id === promptId);
+            if (!currentPrompt) {
+                Toast.error('Prompt not found');
+                return;
+            }
+
+            // Switch to write tab
+            switchTab('write');
+
+            // Show writing area
+            document.getElementById('no-prompt-selected').classList.add('hidden');
+            document.getElementById('essay-writing-area').classList.remove('hidden');
+
+            // Populate prompt
+            document.getElementById('current-prompt-text').textContent = currentPrompt.text;
+
+            // Render perspectives
+            const perspectivesContainer = document.getElementById('perspectives-container');
+            if (currentPrompt.perspectives && currentPrompt.perspectives.length > 0) {
+                perspectivesContainer.innerHTML = currentPrompt.perspectives.map((p, i) => `
+                    <div class="p-3 bg-gray-100 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500 mb-1">Perspective ${i + 1}</p>
+                        <p class="text-gray-700">${escapeHtml(p)}</p>
+                    </div>
+                `).join('');
+            } else {
+                perspectivesContainer.innerHTML = '';
+            }
+
+            // Reset timer
+            resetTimer();
+
+            // Clear essay textarea
+            document.getElementById('essay-textarea').value = '';
+            updateWordCount();
+        }
+
+        function viewEssayDetail(essayId) {
+            currentEssayDetail = gradedEssays.find(e => e.id === essayId);
+            if (!currentEssayDetail) {
+                Toast.error('Essay not found');
+                return;
+            }
+
+            // Hide list, show detail
+            document.getElementById('graded-essays-list').classList.add('hidden');
+            document.getElementById('graded-empty').classList.add('hidden');
+            document.getElementById('essay-detail-view').classList.remove('hidden');
+
+            // Populate detail view
+            document.getElementById('detail-prompt-title').textContent = truncate(currentEssayDetail.promptText || currentEssayDetail.prompt?.text || 'Essay', 60);
+            document.getElementById('detail-date').textContent = formatDate(currentEssayDetail.gradedAt || currentEssayDetail.createdAt);
+            document.getElementById('detail-prompt-text').textContent = currentEssayDetail.promptText || currentEssayDetail.prompt?.text || '';
+            document.getElementById('detail-essay-content').innerHTML = formatEssayContent(currentEssayDetail.content || currentEssayDetail.text || '');
+
+            // Scores
+            const scores = currentEssayDetail.scores || {};
+            document.getElementById('detail-overall-score').textContent = currentEssayDetail.overallScore || '--';
+            
+            updateScore('ideas', scores.ideas);
+            updateScore('development', scores.development);
+            updateScore('organization', scores.organization);
+            updateScore('language', scores.language);
+
+            // Strengths and weaknesses
+            const strengthsList = document.getElementById('detail-strengths');
+            const weaknessesList = document.getElementById('detail-weaknesses');
+            
+            strengthsList.innerHTML = (currentEssayDetail.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li class="text-gray-500">No strengths identified</li>';
+            weaknessesList.innerHTML = (currentEssayDetail.weaknesses || []).map(w => `<li>${escapeHtml(w)}</li>`).join('') || '<li class="text-gray-500">No areas for improvement identified</li>';
+
+            // Detailed feedback
+            document.getElementById('detail-feedback').textContent = currentEssayDetail.feedback || 'No detailed feedback available.';
+        }
+
+        function updateScore(type, score) {
+            const scoreEl = document.getElementById(`score-${type}`);
+            const barEl = document.getElementById(`bar-${type}`);
+            
+            if (score !== undefined && score !== null) {
+                scoreEl.textContent = `${score}/6`;
+                barEl.style.width = `${(score / 6) * 100}%`;
+            } else {
+                scoreEl.textContent = '--/6';
+                barEl.style.width = '0%';
+            }
+        }
+
+        function formatEssayContent(content) {
+            return content.split('\n').map(p => p.trim() ? `<p class="mb-4">${escapeHtml(p)}</p>` : '').join('');
+        }
+
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            // Category and difficulty filters
+            document.getElementById('category-filter').addEventListener('change', renderPrompts);
+            document.getElementById('difficulty-filter').addEventListener('change', renderPrompts);
+
+            // Generate prompt button
+            document.getElementById('generate-prompt-btn').addEventListener('click', showGenerateModal);
+
+            // Generate modal
+            document.getElementById('close-generate-modal').addEventListener('click', hideGenerateModal);
+            document.getElementById('cancel-generate').addEventListener('click', hideGenerateModal);
+            document.getElementById('confirm-generate').addEventListener('click', generatePrompt);
+
+            // Close prompt button
+            document.getElementById('close-prompt-btn').addEventListener('click', () => {
+                document.getElementById('essay-writing-area').classList.add('hidden');
+                document.getElementById('no-prompt-selected').classList.remove('hidden');
+                currentPrompt = null;
+                stopTimer();
+            });
+
+            // Timer controls
+            document.getElementById('timer-toggle').addEventListener('click', toggleTimer);
+            document.getElementById('timer-reset').addEventListener('click', resetTimer);
+
+            // Font size controls
+            document.getElementById('font-decrease').addEventListener('click', () => changeFontSize(-1));
+            document.getElementById('font-increase').addEventListener('click', () => changeFontSize(1));
+
+            // Dark mode toggle
+            document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+
+            // Essay textarea
+            document.getElementById('essay-textarea').addEventListener('input', updateWordCount);
+
+            // Submit essay
+            document.getElementById('submit-essay-btn').addEventListener('click', submitEssay);
+
+            // Back to list
+            document.getElementById('back-to-list-btn').addEventListener('click', () => {
+                document.getElementById('essay-detail-view').classList.add('hidden');
+                document.getElementById('graded-essays-list').classList.remove('hidden');
+                if (gradedEssays.length === 0) {
+                    document.getElementById('graded-empty').classList.remove('hidden');
+                }
+            });
+
+            // Download PDF
+            document.getElementById('download-pdf-btn').addEventListener('click', downloadPDF);
+
+            // User menu toggle
+            document.getElementById('user-menu-btn').addEventListener('click', () => {
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                const userMenu = document.getElementById('user-menu');
+                if (!userMenu.contains(e.target)) {
+                    document.getElementById('user-dropdown').classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                await Auth.logout();
+            });
+
+            // Sidebar toggle
+            document.getElementById('sidebar-toggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+
+            // Close modal on overlay click
+            document.getElementById('generate-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('generate-modal')) {
+                    hideGenerateModal();
+                }
+            });
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-primary', 'border-b-2', 'border-primary');
+                btn.classList.add('text-gray-500');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('active', 'text-primary', 'border-b-2', 'border-primary');
+                    btn.classList.remove('text-gray-500');
+                }
+            });
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+        }
+
+        function showGenerateModal() {
+            document.getElementById('generate-modal').classList.remove('hidden');
+        }
+
+        function hideGenerateModal() {
+            document.getElementById('generate-modal').classList.add('hidden');
+        }
+
+        async function generatePrompt() {
+            const category = document.getElementById('generate-category').value;
+            const difficulty = document.getElementById('generate-difficulty').value;
+            const aiModel = document.getElementById('generate-ai-model').value;
+
+            const btn = document.getElementById('confirm-generate');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner spinner-sm"></div> Generating...';
+
+            try {
+                const response = await API.post('/api/essays/prompts/generate', {
+                    category,
+                    difficulty,
+                    aiModel
+                });
+
+                if (response.data) {
+                    prompts.unshift(response.data);
+                    renderPrompts();
+                    hideGenerateModal();
+                    Toast.success('Prompt generated successfully!');
+                }
+            } catch (error) {
+                console.error('Failed to generate prompt:', error);
+                Toast.error(error.message || 'Failed to generate prompt');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic"></i> Generate';
+            }
+        }
+
+        // Timer functions
+        function toggleTimer() {
+            if (timerRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            timerRunning = true;
+            document.getElementById('timer-toggle').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    Toast.warning('Time is up!');
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            timerRunning = false;
+            document.getElementById('timer-toggle').innerHTML = '<i class="fas fa-play"></i>';
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timerSeconds = 40 * 60;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timer-display').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Font size functions
+        function changeFontSize(delta) {
+            fontSize = Math.min(24, Math.max(12, fontSize + delta));
+            document.getElementById('font-size-display').textContent = fontSize;
+            document.getElementById('essay-textarea').style.fontSize = `${fontSize}px`;
+        }
+
+        // Dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            const textarea = document.getElementById('essay-textarea');
+            const icon = document.getElementById('dark-mode-toggle').querySelector('i');
+            
+            if (darkMode) {
+                textarea.style.backgroundColor = '#1f2937';
+                textarea.style.color = '#f9fafb';
+                icon.className = 'fas fa-sun';
+            } else {
+                textarea.style.backgroundColor = '';
+                textarea.style.color = '';
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        // Word count
+        function updateWordCount() {
+            const text = document.getElementById('essay-textarea').value.trim();
+            const words = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+            const paragraphs = text ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length : 0;
+
+            document.getElementById('word-count').textContent = words;
+            document.getElementById('paragraph-count').textContent = paragraphs;
+
+            // Update target indicator
+            const indicator = document.getElementById('word-target-indicator');
+            if (words < 500) {
+                indicator.innerHTML = `<span class="text-warning">(${500 - words} more needed)</span>`;
+            } else if (words > 800) {
+                indicator.innerHTML = `<span class="text-warning">(${words - 800} over target)</span>`;
+            } else {
+                indicator.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> On target</span>`;
+            }
+        }
+
+        // Auto-save
+        function startAutoSave() {
+            autoSaveInterval = setInterval(saveDraft, 30000); // Every 30 seconds
+        }
+
+        async function saveDraft() {
+            if (!currentPrompt) return;
+            
+            const content = document.getElementById('essay-textarea').value;
+            if (!content.trim()) return;
+
+            const indicator = document.getElementById('autosave-indicator');
+            indicator.innerHTML = '<i class="fas fa-sync fa-spin"></i> Saving...';
+
+            try {
+                await API.post('/api/essays/drafts', {
+                    promptId: currentPrompt.id,
+                    content,
+                    wordCount: content.split(/\s+/).filter(w => w.length > 0).length
+                });
+                indicator.innerHTML = '<i class="fas fa-cloud"></i> Saved';
+            } catch (error) {
+                console.error('Failed to save draft:', error);
+                indicator.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i> Save failed';
+            }
+        }
+
+        async function submitEssay() {
+            if (!currentPrompt) {
+                Toast.error('No prompt selected');
+                return;
+            }
+
+            const content = document.getElementById('essay-textarea').value.trim();
+            if (!content) {
+                Toast.error('Please write an essay before submitting');
+                return;
+            }
+
+            const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
+            if (wordCount < 100) {
+                Toast.error('Essay is too short. Please write at least 100 words.');
+                return;
+            }
+
+            // Show grading view
+            document.getElementById('write-tab').classList.add('hidden');
+            document.getElementById('grading-view').classList.remove('hidden');
+
+            try {
+                const response = await API.post('/api/essays/grade', {
+                    promptId: currentPrompt.id,
+                    promptText: currentPrompt.text,
+                    content,
+                    perspectives: currentPrompt.perspectives
+                });
+
+                if (response.data) {
+                    // Add to graded essays
+                    gradedEssays.unshift(response.data);
+                    renderGradedEssays();
+
+                    // Switch to graded tab and show detail
+                    document.getElementById('grading-view').classList.add('hidden');
+                    switchTab('graded');
+                    viewEssayDetail(response.data.id);
+
+                    Toast.success('Essay graded successfully!');
+                }
+            } catch (error) {
+                console.error('Failed to grade essay:', error);
+                Toast.error(error.message || 'Failed to grade essay');
+                document.getElementById('grading-view').classList.add('hidden');
+                document.getElementById('write-tab').classList.remove('hidden');
+            }
+        }
+
+        function downloadPDF() {
+            Toast.info('Preparing PDF...');
+            // For now, trigger print dialog
+            window.print();
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function truncate(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                return new Date(dateStr).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function getDifficultyBadge(difficulty) {
+            const badges = {
+                beginner: 'success',
+                intermediate: 'warning',
+                advanced: 'danger'
+            };
+            return badges[difficulty?.toLowerCase()] || 'primary';
+        }
+
+        // Make functions globally available
+        window.selectPrompt = selectPrompt;
+        window.viewEssayDetail = viewEssayDetail;
+        window.switchTab = switchTab;
+        window.showGenerateModal = showGenerateModal;
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
