@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <button id="exit-btn" class="text-gray-600 hover:text-danger">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                <span id="quiz-title" class="font-semibold truncate max-w-md">Loading...</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="timer" class="hidden bg-gray-100 px-4 py-2 rounded-lg font-mono font-semibold">
+                    <i class="fas fa-clock mr-2"></i><span id="time-display">00:00</span>
+                </div>
+                <span id="progress-text" class="text-sm text-gray-600">Question 1 of 10</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-20 pb-24 max-w-4xl mx-auto px-4">
+        <!-- Loading -->
+        <div id="loading-state" class="text-center py-16">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading quiz...</p>
+        </div>
+
+        <!-- Question Area -->
+        <div id="question-container" class="hidden">
+            <div class="card mb-6">
+                <div class="card-body">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="badge bg-gray-100" id="question-number">Question 1</span>
+                        <button id="flag-btn" class="btn btn-ghost btn-sm">
+                            <i class="far fa-flag"></i> Flag
+                        </button>
+                    </div>
+                    <div id="question-text" class="text-lg mb-6"></div>
+                    <div id="options-container" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Question Navigation -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <h4 class="text-sm font-semibold text-gray-500 mb-3">Question Navigator</h4>
+                    <div id="question-nav" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Navigation -->
+    <footer id="footer-nav" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t py-4 px-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <button id="prev-btn" class="btn btn-outline" disabled>
+                <i class="fas fa-chevron-left mr-2"></i> Previous
+            </button>
+            <button id="submit-btn" class="hidden btn btn-success">
+                <i class="fas fa-check mr-2"></i> Submit Quiz
+            </button>
+            <button id="next-btn" class="btn btn-primary">
+                Next <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Storage } = window.ACT;
+
+        let quiz = null;
+        let currentQuestion = 0;
+        let answers = {};
+        let flagged = {};
+        let timer = null;
+        let timeRemaining = 0;
+
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const pathParts = window.location.pathname.split('/');
+            const quizId = pathParts[pathParts.length - 1];
+
+            if (!quizId) {
+                window.location.href = '/quizzes';
+                return;
+            }
+
+            await loadQuiz(quizId);
+        }
+
+        async function loadQuiz(id) {
+            try {
+                const response = await API.get(`/api/quizzes/${id}`);
+                quiz = response.data.quiz;
+
+                if (quiz.status === 'completed') {
+                    window.location.href = `/quiz-results/${id}`;
+                    return;
+                }
+
+                // Start quiz if not started
+                if (quiz.status === 'not_started') {
+                    await API.post(`/api/quizzes/${id}/start`);
+                }
+
+                // Load saved answers
+                answers = quiz.answers || {};
+                flagged = {};
+                quiz.questions.forEach(q => {
+                    if (q.flagged) flagged[q.id] = true;
+                });
+
+                document.getElementById('quiz-title').textContent = quiz.title;
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('question-container').classList.remove('hidden');
+                document.getElementById('footer-nav').classList.remove('hidden');
+
+                // Setup timer if timed
+                if (quiz.timed && quiz.timeLimit) {
+                    timeRemaining = quiz.timeLimit * 60;
+                    document.getElementById('timer').classList.remove('hidden');
+                    startTimer();
+                }
+
+                renderQuestion();
+                renderNavigation();
+                setupAutoSave();
+
+            } catch (error) {
+                Toast.error('Failed to load quiz');
+                setTimeout(() => window.location.href = '/quizzes', 2000);
+            }
+        }
+
+        function renderQuestion() {
+            const q = quiz.questions[currentQuestion];
+            
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1}`;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${quiz.questions.length}`;
+            document.getElementById('question-text').innerHTML = q.question;
+
+            // Update flag button
+            const flagBtn = document.getElementById('flag-btn');
+            if (flagged[q.id]) {
+                flagBtn.innerHTML = '<i class="fas fa-flag text-warning"></i> Flagged';
+            } else {
+                flagBtn.innerHTML = '<i class="far fa-flag"></i> Flag';
+            }
+
+            // Render options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = Object.entries(q.options).map(([key, value]) => `
+                <div class="quiz-option ${answers[q.id] === key ? 'selected' : ''}" data-option="${key}">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 font-semibold mr-3">${key}</span>
+                    <span>${value}</span>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            optionsContainer.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.option));
+            });
+
+            // Update nav buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            
+            if (currentQuestion === quiz.questions.length - 1) {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('submit-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('submit-btn').classList.add('hidden');
+            }
+
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('question-container')]);
+            }
+        }
+
+        function renderNavigation() {
+            const nav = document.getElementById('question-nav');
+            nav.innerHTML = quiz.questions.map((q, i) => {
+                let classes = 'w-10 h-10 rounded-lg font-semibold text-sm ';
+                if (i === currentQuestion) {
+                    classes += 'bg-primary text-white';
+                } else if (flagged[q.id]) {
+                    classes += 'bg-warning text-white';
+                } else if (answers[q.id]) {
+                    classes += 'bg-success text-white';
+                } else {
+                    classes += 'bg-gray-100 hover:bg-gray-200';
+                }
+                return `<button class="${classes}" onclick="goToQuestion(${i})">${i + 1}</button>`;
+            }).join('');
+        }
+
+        function selectOption(option) {
+            const q = quiz.questions[currentQuestion];
+            answers[q.id] = option;
+            renderQuestion();
+            renderNavigation();
+        }
+
+        function goToQuestion(index) {
+            currentQuestion = index;
+            renderQuestion();
+            renderNavigation();
+        }
+        window.goToQuestion = goToQuestion;
+
+        // Flag toggle
+        document.getElementById('flag-btn').addEventListener('click', () => {
+            const q = quiz.questions[currentQuestion];
+            flagged[q.id] = !flagged[q.id];
+            renderQuestion();
+            renderNavigation();
+        });
+
+        // Navigation
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+                renderNavigation();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentQuestion < quiz.questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+                renderNavigation();
+            }
+        });
+
+        // Submit
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const unanswered = quiz.questions.filter(q => !answers[q.id]).length;
+            
+            let message = 'Are you sure you want to submit this quiz?';
+            if (unanswered > 0) {
+                message = `You have ${unanswered} unanswered question(s). Are you sure you want to submit?`;
+            }
+
+            Modal.confirm(message, submitQuiz);
+        });
+
+        async function submitQuiz() {
+            try {
+                const timeSpent = quiz.timed ? (quiz.timeLimit * 60 - timeRemaining) : null;
+                
+                const response = await API.post(`/api/quizzes/${quiz.id}/submit`, {
+                    answers,
+                    timeSpent
+                });
+
+                if (timer) clearInterval(timer);
+                Toast.success('Quiz submitted!');
+                window.location.href = `/quiz-results/${quiz.id}`;
+
+            } catch (error) {
+                Toast.error('Failed to submit quiz');
+            }
+        }
+
+        // Timer
+        function startTimer() {
+            updateTimerDisplay();
+            timer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 300 && timeRemaining > 0) {
+                    document.getElementById('timer').classList.add('bg-danger/10', 'text-danger');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    Toast.warning('Time is up!');
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            document.getElementById('time-display').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Auto-save
+        function setupAutoSave() {
+            setInterval(async () => {
+                try {
+                    await API.put(`/api/quizzes/${quiz.id}/answers`, { answers, flagged });
+                } catch (e) {
+                    console.error('Auto-save failed');
+                }
+            }, 10000);
+        }
+
+        // Exit confirmation
+        document.getElementById('exit-btn').addEventListener('click', () => {
+            Modal.confirm('Are you sure you want to exit? Your progress will be saved.', () => {
+                window.location.href = '/quizzes';
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

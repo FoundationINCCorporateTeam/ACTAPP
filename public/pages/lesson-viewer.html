@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .lesson-content h1 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+        .lesson-content h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .lesson-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        .lesson-content p { margin-bottom: 1rem; line-height: 1.7; }
+        .lesson-content ul, .lesson-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        .lesson-content li { margin-bottom: 0.5rem; }
+        .lesson-content code { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875rem; }
+        .lesson-content pre { background: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+        .lesson-content pre code { background: transparent; padding: 0; }
+        .lesson-content blockquote { border-left: 4px solid #2563eb; padding-left: 1rem; margin: 1rem 0; color: #4b5563; font-style: italic; }
+        .lesson-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        .lesson-content th, .lesson-content td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; }
+        .lesson-content th { background: #f9fafb; font-weight: 600; }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <a href="/lessons" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <span class="text-lg font-semibold truncate max-w-md" id="lesson-title">Loading...</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="favorite-btn" class="btn btn-ghost" title="Favorite">
+                    <i class="far fa-star"></i>
+                </button>
+                <button id="complete-btn" class="btn btn-ghost" title="Mark Complete">
+                    <i class="far fa-check-circle"></i>
+                </button>
+                <button onclick="window.print()" class="btn btn-ghost" title="Print">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button id="delete-btn" class="btn btn-ghost text-danger" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- Loading State -->
+            <div id="loading-state" class="text-center py-16">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading lesson...</p>
+            </div>
+
+            <!-- Lesson Header -->
+            <div id="lesson-header" class="hidden mb-8">
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span id="subject-badge" class="badge">Subject</span>
+                    <span id="difficulty-badge" class="badge bg-gray-100">Difficulty</span>
+                    <span id="length-badge" class="text-sm text-gray-500"><i class="fas fa-clock mr-1"></i>Length</span>
+                </div>
+                <h1 id="lesson-title-main" class="text-3xl font-bold mb-2">Lesson Title</h1>
+                <p id="lesson-topic" class="text-lg text-gray-600">Topic</p>
+                <p id="lesson-date" class="text-sm text-gray-400 mt-2">Created on</p>
+            </div>
+
+            <!-- Lesson Content -->
+            <div id="lesson-content" class="hidden card">
+                <div class="card-body lesson-content prose max-w-none" id="content-area">
+                    <!-- Markdown content will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div id="notes-section" class="hidden mt-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-semibold"><i class="fas fa-sticky-note mr-2 text-warning"></i>Personal Notes</h3>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="notes-textarea" class="form-input h-32" placeholder="Add your personal notes about this lesson..."></textarea>
+                        <div class="mt-3 flex justify-end">
+                            <button id="save-notes-btn" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save mr-1"></i> Save Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading, Format } = window.ACT;
+
+        let lesson = null;
+
+        async function init() {
+            const user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Get lesson ID from URL
+            const pathParts = window.location.pathname.split('/');
+            const lessonId = pathParts[pathParts.length - 1];
+
+            if (!lessonId) {
+                window.location.href = '/lessons';
+                return;
+            }
+
+            await loadLesson(lessonId);
+        }
+
+        async function loadLesson(id) {
+            try {
+                const response = await API.get(`/api/lessons/${id}`);
+                lesson = response.data.lesson;
+                renderLesson();
+            } catch (error) {
+                Toast.error('Failed to load lesson');
+                setTimeout(() => window.location.href = '/lessons', 2000);
+            }
+        }
+
+        function renderLesson() {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('lesson-header').classList.remove('hidden');
+            document.getElementById('lesson-content').classList.remove('hidden');
+            document.getElementById('notes-section').classList.remove('hidden');
+
+            // Update header
+            document.getElementById('lesson-title').textContent = lesson.title;
+            document.getElementById('lesson-title-main').textContent = lesson.title;
+            document.getElementById('lesson-topic').textContent = lesson.topic;
+            document.getElementById('lesson-date').textContent = `Created ${Format.date(lesson.createdAt)}`;
+
+            // Subject badge
+            const subjectColors = {
+                'English': 'bg-blue-100 text-blue-700',
+                'Math': 'bg-green-100 text-green-700',
+                'Reading': 'bg-yellow-100 text-yellow-700',
+                'Science': 'bg-purple-100 text-purple-700',
+                'Writing': 'bg-pink-100 text-pink-700'
+            };
+            document.getElementById('subject-badge').className = `badge ${subjectColors[lesson.subject] || 'bg-gray-100'}`;
+            document.getElementById('subject-badge').textContent = lesson.subject;
+            document.getElementById('difficulty-badge').textContent = lesson.difficulty;
+            document.getElementById('length-badge').innerHTML = `<i class="fas fa-clock mr-1"></i>${lesson.length}`;
+
+            // Render content with Markdown
+            const content = marked.parse(lesson.content || '');
+            document.getElementById('content-area').innerHTML = content;
+
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('content-area')]);
+            }
+
+            // Notes
+            document.getElementById('notes-textarea').value = lesson.notes || '';
+
+            // Update favorite button
+            updateFavoriteButton();
+            updateCompleteButton();
+        }
+
+        function updateFavoriteButton() {
+            const btn = document.getElementById('favorite-btn');
+            if (lesson.favorite) {
+                btn.innerHTML = '<i class="fas fa-star text-warning"></i>';
+            } else {
+                btn.innerHTML = '<i class="far fa-star"></i>';
+            }
+        }
+
+        function updateCompleteButton() {
+            const btn = document.getElementById('complete-btn');
+            if (lesson.completed) {
+                btn.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+            } else {
+                btn.innerHTML = '<i class="far fa-check-circle"></i>';
+            }
+        }
+
+        // Favorite toggle
+        document.getElementById('favorite-btn').addEventListener('click', async () => {
+            try {
+                lesson.favorite = !lesson.favorite;
+                await API.put(`/api/lessons/${lesson.id}`, { favorite: lesson.favorite });
+                updateFavoriteButton();
+                Toast.success(lesson.favorite ? 'Added to favorites' : 'Removed from favorites');
+            } catch (error) {
+                Toast.error('Failed to update');
+            }
+        });
+
+        // Complete toggle
+        document.getElementById('complete-btn').addEventListener('click', async () => {
+            try {
+                lesson.completed = !lesson.completed;
+                await API.put(`/api/lessons/${lesson.id}`, { completed: lesson.completed });
+                updateCompleteButton();
+                Toast.success(lesson.completed ? 'Marked as complete' : 'Marked as incomplete');
+            } catch (error) {
+                Toast.error('Failed to update');
+            }
+        });
+
+        // Save notes
+        document.getElementById('save-notes-btn').addEventListener('click', async () => {
+            const notes = document.getElementById('notes-textarea').value;
+            const btn = document.getElementById('save-notes-btn');
+            
+            Loading.button(btn, true, 'Saving...');
+            
+            try {
+                await API.put(`/api/lessons/${lesson.id}`, { notes });
+                lesson.notes = notes;
+                Toast.success('Notes saved');
+            } catch (error) {
+                Toast.error('Failed to save notes');
+            }
+            
+            Loading.button(btn, false);
+        });
+
+        // Delete lesson
+        document.getElementById('delete-btn').addEventListener('click', () => {
+            Modal.confirm('Are you sure you want to delete this lesson?', async () => {
+                try {
+                    await API.delete(`/api/lessons/${lesson.id}`);
+                    Toast.success('Lesson deleted');
+                    window.location.href = '/lessons';
+                } catch (error) {
+                    Toast.error('Failed to delete lesson');
+                }
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & FAQ - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold hidden sm:inline">ACT AI Tutor</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-bold mb-4">Help Center</h1>
+            <p class="text-gray-600">Find answers to common questions and learn how to get the most out of ACT AI Tutor</p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid md:grid-cols-3 gap-6 mb-12">
+            <a href="#getting-started" class="card p-6 text-center hover:shadow-lg transition">
+                <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-rocket text-primary text-2xl"></i>
+                </div>
+                <h3 class="font-semibold mb-2">Getting Started</h3>
+                <p class="text-sm text-gray-500">Learn the basics of using ACT AI Tutor</p>
+            </a>
+            
+            <a href="#features" class="card p-6 text-center hover:shadow-lg transition">
+                <div class="w-14 h-14 bg-success/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-star text-success text-2xl"></i>
+                </div>
+                <h3 class="font-semibold mb-2">Features</h3>
+                <p class="text-sm text-gray-500">Explore all available features</p>
+            </a>
+            
+            <a href="#faq" class="card p-6 text-center hover:shadow-lg transition">
+                <div class="w-14 h-14 bg-warning/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-question-circle text-warning text-2xl"></i>
+                </div>
+                <h3 class="font-semibold mb-2">FAQ</h3>
+                <p class="text-sm text-gray-500">Common questions answered</p>
+            </a>
+        </div>
+
+        <!-- Getting Started -->
+        <section id="getting-started" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-rocket text-primary mr-3"></i> Getting Started
+            </h2>
+            
+            <div class="card">
+                <div class="card-body space-y-6">
+                    <div>
+                        <h3 class="font-semibold mb-2">1. Create Your Account</h3>
+                        <p class="text-gray-600">Sign up for free to access all features. No credit card required.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold mb-2">2. Take a Diagnostic Quiz</h3>
+                        <p class="text-gray-600">Start with a few quizzes to help us understand your current level and identify areas for improvement.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold mb-2">3. Generate Your Study Plan</h3>
+                        <p class="text-gray-600">Enter your target score and test date to get a personalized study schedule.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold mb-2">4. Start Learning</h3>
+                        <p class="text-gray-600">Generate lessons, take quizzes, and chat with the AI tutor whenever you need help.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-star text-success mr-3"></i> Features Guide
+            </h2>
+            
+            <div class="space-y-4">
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        <i class="fas fa-book text-primary mr-2"></i> AI-Powered Lessons
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <p class="mb-3">Generate comprehensive lessons on any ACT topic:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Choose from 5 subjects: English, Math, Reading, Science, Writing</li>
+                            <li>Select pre-made topics or enter your own custom topic</li>
+                            <li>Adjust difficulty level and lesson length</li>
+                            <li>Focus on specific areas like concepts, examples, or test strategies</li>
+                            <li>Save notes, bookmark favorites, and track completion</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        <i class="fas fa-question-circle text-secondary mr-2"></i> Adaptive Quizzes
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <p class="mb-3">Test your knowledge with customizable quizzes:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Choose 5-30 questions per quiz</li>
+                            <li>Multiple difficulty levels including mixed</li>
+                            <li>Timed or untimed options</li>
+                            <li>Flag questions for review</li>
+                            <li>Detailed explanations for every answer</li>
+                            <li>Track your score history</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        <i class="fas fa-file-alt text-warning mr-2"></i> Practice Tests
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <p class="mb-3">Take full-length ACT practice tests:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Full tests or individual sections</li>
+                            <li>Realistic timing and format</li>
+                            <li>Composite score on 1-36 scale</li>
+                            <li>Section-by-section breakdown</li>
+                            <li>Detailed performance analytics</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        <i class="fas fa-robot text-primary mr-2"></i> AI Chat Tutor
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <p class="mb-3">Get instant help from our AI tutor:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Ask any ACT-related question</li>
+                            <li>Get step-by-step problem solutions</li>
+                            <li>Request practice problems or quizzes</li>
+                            <li>Choose from 13 different AI models</li>
+                            <li>Save conversation history</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        <i class="fas fa-calendar-alt text-danger mr-2"></i> Study Plans
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <p class="mb-3">Get a personalized study schedule:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Set your target score and test date</li>
+                            <li>Specify available study hours</li>
+                            <li>Identify weak and strong areas</li>
+                            <li>Week-by-week task breakdown</li>
+                            <li>Track completion progress</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-question-circle text-warning mr-3"></i> Frequently Asked Questions
+            </h2>
+            
+            <div class="space-y-4">
+                <details class="card" open>
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        Is ACT AI Tutor free?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        Yes! ACT AI Tutor is completely free to use. You get unlimited access to all features including AI lessons, quizzes, practice tests, and the AI tutor chat.
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        How accurate is the AI tutor?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        Our AI tutor uses state-of-the-art language models that are highly accurate for ACT-related content. However, like any AI system, it may occasionally make mistakes. We recommend verifying important information, especially for official test dates or college admission requirements.
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        Can I use this on mobile?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        Yes! ACT AI Tutor is fully responsive and works great on phones, tablets, and desktop computers.
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        How do I improve my score?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        <ol class="list-decimal pl-5 space-y-2">
+                            <li>Take practice quizzes regularly to identify weak areas</li>
+                            <li>Generate lessons on topics you struggle with</li>
+                            <li>Use the AI tutor to get explanations for concepts you don't understand</li>
+                            <li>Create and follow a study plan</li>
+                            <li>Take full practice tests to build stamina and time management skills</li>
+                            <li>Review your mistakes and understand why answers are correct</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        How long should I study for the ACT?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        Most students benefit from 2-3 months of focused preparation. However, this varies based on your starting score, target score, and available study time. Use our study plan generator to get a personalized schedule based on your specific situation.
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary class="card-body cursor-pointer hover:bg-gray-50 font-semibold">
+                        What AI models are available?
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600">
+                        We offer 13 different AI models including DeepSeek V3.2 (recommended), GLM 4.7 Thinking, Llama 4 Maverick, Mistral Large 3, and more. Different models have different strengths - feel free to experiment!
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="card">
+            <div class="card-body text-center">
+                <h2 class="text-xl font-bold mb-4">Still have questions?</h2>
+                <p class="text-gray-600 mb-6">Our team is here to help you succeed!</p>
+                <a href="mailto:support@actaitutor.com" class="btn btn-primary">
+                    <i class="fas fa-envelope mr-2"></i> Contact Support
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

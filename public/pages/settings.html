@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - ACT AI Tutor</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-16">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <span class="text-lg font-semibold">Settings</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-20 pb-12 max-w-2xl mx-auto px-4">
+        <!-- Profile Section -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3 class="font-semibold"><i class="fas fa-user mr-2"></i> Profile</h3>
+            </div>
+            <div class="card-body">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div id="avatar-preview" class="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                        ?
+                    </div>
+                    <div>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden">
+                        <button id="change-avatar-btn" class="btn btn-outline btn-sm">Change Avatar</button>
+                    </div>
+                </div>
+                
+                <form id="profile-form" class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-input" id="name-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-input" id="email-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bio</label>
+                        <textarea name="bio" class="form-input" rows="3" id="bio-input" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Section -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3 class="font-semibold"><i class="fas fa-lock mr-2"></i> Change Password</h3>
+            </div>
+            <div class="card-body">
+                <form id="password-form" class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="currentPassword" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="newPassword" class="form-input" minlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3 class="font-semibold"><i class="fas fa-cog mr-2"></i> Preferences</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium">Theme</div>
+                        <div class="text-sm text-gray-500">Choose your preferred color scheme</div>
+                    </div>
+                    <select id="theme-select" class="form-select w-auto">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium">Default AI Model</div>
+                        <div class="text-sm text-gray-500">Preferred model for AI features</div>
+                    </div>
+                    <select id="model-select" class="form-select w-auto">
+                        <option value="deepseek-v3">DeepSeek V3.2</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium">Study Reminders</div>
+                        <div class="text-sm text-gray-500">Receive daily study reminders</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="reminders-toggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Section -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3 class="font-semibold"><i class="fas fa-database mr-2"></i> Data Management</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium">Export All Data</div>
+                        <div class="text-sm text-gray-500">Download all your data as JSON</div>
+                    </div>
+                    <button id="export-btn" class="btn btn-outline btn-sm">
+                        <i class="fas fa-download mr-1"></i> Export
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium text-danger">Delete Account</div>
+                        <div class="text-sm text-gray-500">Permanently delete your account and all data</div>
+                    </div>
+                    <button id="delete-account-btn" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash mr-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        const { API, Auth, Toast, Modal, Loading } = window.ACT;
+
+        let user = null;
+        let settings = {};
+
+        async function init() {
+            user = await Auth.check();
+            if (!user) {
+                window.location.href = '/login?redirect=/settings';
+                return;
+            }
+
+            // Load settings
+            try {
+                const response = await API.get('/api/settings');
+                settings = response.data.settings;
+            } catch (e) {
+                settings = {};
+            }
+
+            // Load models
+            try {
+                const response = await API.get('/api/lessons/models');
+                const select = document.getElementById('model-select');
+                select.innerHTML = response.data.models.map(m => 
+                    `<option value="${m.key}">${m.name}</option>`
+                ).join('');
+            } catch (e) {}
+
+            renderUser();
+            renderSettings();
+        }
+
+        function renderUser() {
+            document.getElementById('name-input').value = user.name || '';
+            document.getElementById('email-input').value = user.email || '';
+            document.getElementById('bio-input').value = user.bio || '';
+
+            const avatarPreview = document.getElementById('avatar-preview');
+            if (user.avatar) {
+                avatarPreview.innerHTML = `<img src="${user.avatar}" class="w-full h-full rounded-full object-cover">`;
+            } else {
+                avatarPreview.textContent = user.name?.charAt(0).toUpperCase() || '?';
+            }
+        }
+
+        function renderSettings() {
+            document.getElementById('theme-select').value = settings.theme || 'light';
+            document.getElementById('model-select').value = settings.defaultModel || 'deepseek-v3';
+            document.getElementById('reminders-toggle').checked = settings.studyReminders !== false;
+        }
+
+        // Avatar upload
+        document.getElementById('change-avatar-btn').addEventListener('click', () => {
+            document.getElementById('avatar-input').click();
+        });
+
+        document.getElementById('avatar-input').addEventListener('change', async function() {
+            if (this.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('avatar', this.files[0]);
+
+            try {
+                const response = await fetch('/api/auth/avatar', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    user.avatar = data.data.avatarUrl;
+                    renderUser();
+                    Toast.success('Avatar updated');
+                } else {
+                    Toast.error(data.message);
+                }
+            } catch (error) {
+                Toast.error('Failed to upload avatar');
+            }
+        });
+
+        // Profile form
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('name-input').value,
+                email: document.getElementById('email-input').value,
+                bio: document.getElementById('bio-input').value
+            };
+
+            try {
+                const response = await API.put('/api/auth/profile', data);
+                user = response.data.user;
+                Toast.success('Profile updated');
+            } catch (error) {
+                Toast.error(error.message || 'Failed to update profile');
+            }
+        });
+
+        // Password form
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const currentPassword = form.currentPassword.value;
+            const newPassword = form.newPassword.value;
+            const confirmPassword = form.confirmPassword.value;
+
+            if (newPassword !== confirmPassword) {
+                Toast.error('Passwords do not match');
+                return;
+            }
+
+            try {
+                await API.put('/api/auth/password', { currentPassword, newPassword });
+                form.reset();
+                Toast.success('Password changed');
+            } catch (error) {
+                Toast.error(error.message || 'Failed to change password');
+            }
+        });
+
+        // Settings changes
+        ['theme-select', 'model-select'].forEach(id => {
+            document.getElementById(id).addEventListener('change', saveSettings);
+        });
+
+        document.getElementById('reminders-toggle').addEventListener('change', saveSettings);
+
+        async function saveSettings() {
+            const data = {
+                theme: document.getElementById('theme-select').value,
+                defaultModel: document.getElementById('model-select').value,
+                studyReminders: document.getElementById('reminders-toggle').checked
+            };
+
+            try {
+                await API.put('/api/settings', data);
+                Toast.success('Settings saved');
+            } catch (error) {
+                Toast.error('Failed to save settings');
+            }
+        }
+
+        // Export data
+        document.getElementById('export-btn').addEventListener('click', async () => {
+            try {
+                const response = await API.get('/api/progress/export');
+                const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'act-ai-tutor-export.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                Toast.success('Data exported');
+            } catch (error) {
+                Toast.error('Failed to export data');
+            }
+        });
+
+        // Delete account
+        document.getElementById('delete-account-btn').addEventListener('click', () => {
+            Modal.show({
+                title: 'Delete Account',
+                content: `
+                    <p class="text-danger mb-4">This action cannot be undone. All your data will be permanently deleted.</p>
+                    <div class="form-group">
+                        <label class="form-label">Enter your password to confirm:</label>
+                        <input type="password" id="delete-password" class="form-input">
+                    </div>
+                `,
+                confirmText: 'Delete My Account',
+                onConfirm: async () => {
+                    const password = document.getElementById('delete-password').value;
+                    if (!password) {
+                        Toast.error('Please enter your password');
+                        return false;
+                    }
+
+                    try {
+                        await API.delete('/api/settings/account', { body: JSON.stringify({ password }) });
+                        Toast.success('Account deleted');
+                        window.location.href = '/';
+                    } catch (error) {
+                        Toast.error(error.message || 'Failed to delete account');
+                        return false;
+                    }
+                }
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>
