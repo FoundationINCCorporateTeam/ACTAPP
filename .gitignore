@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Data files (contain user data)
+data/*.json
+!data/.gitkeep
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# PM2
+.pm2/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
